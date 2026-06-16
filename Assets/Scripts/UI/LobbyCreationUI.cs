@@ -50,6 +50,7 @@ public class LobbyCreationUI : MonoBehaviour
         startGameBtn.onClick.AddListener(() =>
         {
             SaveDataToGameDataClass();
+            Timer.instance.StartTimer(10, () => { });
             SceneManager.LoadScene("Game");
         });
     }

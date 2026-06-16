@@ -2813,6 +2813,7 @@ MonoBehaviour:
   roundsSlider: {fileID: 381182902}
   playerCountSlider: {fileID: 1182490609}
   imposterCountSlider: {fileID: 1374839994}
+  imposterWordToggle: {fileID: 1334019470}
   playerNamesContainer: {fileID: 395349003}
   playerNameInputFiledPrefab: {fileID: 7484600656821585925, guid: 4a3b33377cc99d04bbee9f22c9d4febd, type: 3}
   startGameBtn: {fileID: 931671660}

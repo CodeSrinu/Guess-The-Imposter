@@ -8,13 +8,27 @@ public class Timer : MonoBehaviour
     private float _timeRemaining = 0f;
     private Action _onComplete;
 
-
     [SerializeField] private TextMeshProUGUI timerTxt;
 
-    private void Start()
+    public static Timer instance { get; private set; }
+
+
+    private void Awake()
     {
-        StartTimer(10f, _onComplete);
+        if (instance != null && instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        instance = this;
+
     }
+
+    //private void Start()
+    //{
+    //    StartTimer(10f, _onComplete);
+    //}
 
     public void StartTimer(float time, Action onComplete)
     {
