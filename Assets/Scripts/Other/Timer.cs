@@ -25,10 +25,6 @@ public class Timer : MonoBehaviour
 
     }
 
-    //private void Start()
-    //{
-    //    StartTimer(10f, _onComplete);
-    //}
 
     public void StartTimer(float time, Action onComplete)
     {
