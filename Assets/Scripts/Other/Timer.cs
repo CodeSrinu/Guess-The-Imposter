@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using System;
 using TMPro;
 using UnityEngine;
@@ -11,7 +12,6 @@ public class Timer : MonoBehaviour
     [SerializeField] private TextMeshProUGUI timerTxt;
 
     public static Timer instance { get; private set; }
-
 
     private void Awake()
     {
@@ -29,8 +29,9 @@ public class Timer : MonoBehaviour
     public void StartTimer(float time, Action onComplete)
     {
         _isTimeRunning = true;
-        _timeRemaining = time + 1f;
+        _timeRemaining = time;
         _onComplete = onComplete;
+        DisplayTime(_timeRemaining);
     }
 
     private void Update()
