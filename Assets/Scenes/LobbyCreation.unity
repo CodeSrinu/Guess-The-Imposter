@@ -854,7 +854,7 @@ GameObject:
   - component: {fileID: 381182901}
   - component: {fileID: 381182902}
   m_Layer: 5
-  m_Name: Slider
+  m_Name: ' RoundsSlider'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1377,8 +1377,8 @@ RectTransform:
   m_LocalScale: {x: 0.64645, y: 0.64645, z: 0.64645}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 121316753}
   - {fileID: 1949661445}
+  - {fileID: 121316753}
   m_Father: {fileID: 2083537207}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
@@ -2555,7 +2555,7 @@ GameObject:
   - component: {fileID: 1182490608}
   - component: {fileID: 1182490609}
   m_Layer: 5
-  m_Name: Slider
+  m_Name: PlayerCountSlider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2804,7 +2804,7 @@ GameObject:
   - component: {fileID: 1374839993}
   - component: {fileID: 1374839994}
   m_Layer: 5
-  m_Name: Slider
+  m_Name: imposters Count Slider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3466,9 +3466,9 @@ MonoBehaviour:
   roundsSlider: {fileID: 381182902}
   playerCountSlider: {fileID: 1182490609}
   imposterCountSlider: {fileID: 1374839994}
-  votingDurationSlider: {fileID: 0}
+  votingDurationInputFeild: {fileID: 1949661446}
   imposterWordToggle: {fileID: 1334019470}
-  isOnlineToggle: {fileID: 0}
+  isOnlineToggle: {fileID: 455655939}
   playerNamesContainer: {fileID: 395349003}
   playerNameInputFiledPrefab: {fileID: 7484600656821585925, guid: 4a3b33377cc99d04bbee9f22c9d4febd, type: 3}
   startGameBtn: {fileID: 931671660}

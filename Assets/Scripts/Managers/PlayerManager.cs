@@ -7,7 +7,6 @@ public class PlayerManager : MonoBehaviour
     private List<Player> _players = new List<Player>();
 
     public List<Player> GetPlayers => _players;
-    public bool isEliminated = false;
 
     public static PlayerManager instance;
 

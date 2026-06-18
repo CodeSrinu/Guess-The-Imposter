@@ -4,4 +4,6 @@ public class Player
     public bool isImposter;
     public string assignedWord;
     public bool hasGiveClue;
+    public bool hasVoted;
+    public bool isEliminated;
 }

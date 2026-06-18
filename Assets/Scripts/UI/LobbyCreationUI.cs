@@ -10,7 +10,7 @@ public class LobbyCreationUI : MonoBehaviour
     [SerializeField] private Slider roundsSlider;
     [SerializeField] private Slider playerCountSlider;
     [SerializeField] private Slider imposterCountSlider;
-    [SerializeField] private Slider votingDurationSlider;
+    [SerializeField] private TMP_InputField votingDurationInputFeild;
     [SerializeField] private Toggle imposterWordToggle;
     [SerializeField] private Toggle isOnlineToggle;
 
@@ -51,9 +51,12 @@ public class LobbyCreationUI : MonoBehaviour
             canImposterHaveWord = value;
         });
 
-        votingDurationSlider.onValueChanged.AddListener((value) =>
+        votingDurationInputFeild.onValueChanged.AddListener((value) =>
         {
-            votingDuration = Mathf.RoundToInt(value);
+            int parsedValue = int.Parse(value);
+            votingDuration = Mathf.RoundToInt(parsedValue);
+            if (votingDuration > 60)
+                votingDuration = 60;
         });
 
         isOnlineToggle.onValueChanged.AddListener((value) =>
@@ -64,9 +67,11 @@ public class LobbyCreationUI : MonoBehaviour
         startGameBtn.onClick.AddListener(() =>
         {
             SaveDataToGameDataClass();
-            Timer.instance.StartTimer(10, () => { });
             SceneManager.LoadScene("Game");
         });
+
+        votingDurationInputFeild.contentType = TMP_InputField.ContentType.IntegerNumber;
+        votingDurationInputFeild.ForceLabelUpdate();
     }
 
     public void InstantiateInputFields(int count)
