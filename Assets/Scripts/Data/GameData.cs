@@ -7,4 +7,6 @@ public static class GameData
     public static List<string> playerNames = new List<string>();
     public static int imposterCount = 1;
     public static bool canImposterHaveWord = false;
+    public static bool isOnline = false;
+    public static float votingDuration = 30f;
 }

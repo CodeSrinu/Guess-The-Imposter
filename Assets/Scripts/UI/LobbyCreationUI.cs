@@ -10,7 +10,9 @@ public class LobbyCreationUI : MonoBehaviour
     [SerializeField] private Slider roundsSlider;
     [SerializeField] private Slider playerCountSlider;
     [SerializeField] private Slider imposterCountSlider;
+    [SerializeField] private Slider votingDurationSlider;
     [SerializeField] private Toggle imposterWordToggle;
+    [SerializeField] private Toggle isOnlineToggle;
 
     [SerializeField] private Transform playerNamesContainer;
     [SerializeField] private GameObject playerNameInputFiledPrefab;
@@ -20,6 +22,8 @@ public class LobbyCreationUI : MonoBehaviour
     private  int playersCount = 3;
     private List<string> playerNames = new List<string>();
     private int imposterCount = 1;
+    private int votingDuration = 30;
+    private bool isOnline = false;
     private bool canImposterHaveWord = false;
 
     private void Awake()
@@ -45,6 +49,16 @@ public class LobbyCreationUI : MonoBehaviour
         imposterWordToggle.onValueChanged.AddListener((value) =>
         {
             canImposterHaveWord = value;
+        });
+
+        votingDurationSlider.onValueChanged.AddListener((value) =>
+        {
+            votingDuration = Mathf.RoundToInt(value);
+        });
+
+        isOnlineToggle.onValueChanged.AddListener((value) =>
+        {
+            isOnline = value;
         });
 
         startGameBtn.onClick.AddListener(() =>
@@ -85,5 +99,7 @@ public class LobbyCreationUI : MonoBehaviour
         GameData.roundsCount = roundsCount;
         GameData.imposterCount = imposterCount;
         GameData.canImposterHaveWord = canImposterHaveWord;
+        GameData.votingDuration = votingDuration;
+        GameData.isOnline = isOnline;
     }
 }
