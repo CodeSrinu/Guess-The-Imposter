@@ -7,8 +7,10 @@ public class RoundManager : MonoBehaviour
     private int _currentPlayerIndex;
     private int _currentRound;
     public enum GamePhase { WordReveal, Clue, Voting, Result}
+    public enum GameResult { None, ImpostersWon, CiviliansWon}
 
     private GamePhase _currentPhase;
+    private GameResult _gameResult;
 
     public GamePhase currentPhase => _currentPhase;
 
@@ -41,8 +43,9 @@ public class RoundManager : MonoBehaviour
             Timer.instance.StartTimer(GameData.votingDuration, VotingManager.instance.TallyVotes);
     }
 
-    public void EndGame()
+    public void EndGame(GameResult result)
     {
+        _gameResult = result;
         _currentPhase = GamePhase.Result;
     }
 
@@ -52,7 +55,7 @@ public class RoundManager : MonoBehaviour
 
         if(_currentRound > GameData.roundsCount)
         {
-            CheckWinCondition();
+            StartVoting();
         }
         else
         {
@@ -61,23 +64,41 @@ public class RoundManager : MonoBehaviour
         }
     }
 
-    public void CheckWinCondition()
+    public GameResult CheckWinCondition()
     {
-        int imposterCount = 0;
-        foreach(Player player in PlayerManager.instance.GetPlayers)
+        int remainingImposters = 0;
+        int remainingCivilians = 0;
+        foreach (Player player in PlayerManager.instance.GetPlayers)
         {
-            if(player.isImposter)
-                imposterCount++;
+            if (!player.isEliminated)
+            {
+                if (player.isImposter)
+                {
+                    remainingImposters++;
+                }
+                else
+                {
+                    remainingCivilians++;
+                }
+            }
         }
 
-        if(imposterCount <= 0)
+
+        if (remainingImposters >= remainingCivilians)
+        {
+            Debug.Log("Imposters Won");
+            return GameResult.ImpostersWon;
+        }
+        else if (remainingImposters <= 0)
         {
             Debug.Log("Civilians Won");
+            return GameResult.CiviliansWon;
         }
         else
         {
-            Debug.Log("Imposters Won");
+            return GameResult.None;
         }
+        
     }
 
     public void NextPlayerClue()

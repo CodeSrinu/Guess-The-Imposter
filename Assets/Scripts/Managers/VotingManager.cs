@@ -22,18 +22,16 @@ public class VotingManager : MonoBehaviour
     }
     private void Start()
     {
-        Intialize();
-        //testing purpose
-        AssignRondomValues();
-        TallyVotes();
+        Initialize();
     }
 
 
-    public void Intialize()
+    public void Initialize()
     {
         foreach(Player player in PlayerManager.instance.GetPlayers)
         {
-            _votes[player] = 0;
+            if(!player.isEliminated)
+                _votes[player] = 0;
         }
     }
 
@@ -51,14 +49,11 @@ public class VotingManager : MonoBehaviour
     }
     
 
-    //testing purpose
-    public void AssignRondomValues()
+    public void ResetVotes()
     {
-        foreach (Player player in _votes.Keys.ToList())
-        {
-            _votes[player] = Random.Range(0, GameData.playersCount);
-        }
-
+        _votes.Clear();
+        _votesCount = 0;
+        Initialize();
     }
 
 
@@ -66,9 +61,10 @@ public class VotingManager : MonoBehaviour
 
     public void TallyVotes()
     {
-        Player highestVotedPlayer;
+        Player highestVotedPlayer = new Player();
 
         List<int> playerVotes = _votes.Values.ToList();
+        List<Player> highestVotedPlayersList = new List<Player>();
 
         foreach (int vote in playerVotes) Debug.Log(vote);
 
@@ -77,7 +73,29 @@ public class VotingManager : MonoBehaviour
             if(_votes[player] == _votes.Values.Max())
             {
                 highestVotedPlayer = player;
+                highestVotedPlayersList.Add(player);
             }
+        }
+
+        if(highestVotedPlayersList.Count > 1)
+        {
+            //tie
+            RoundManager.instance.NextRound();
+            ResetVotes();
+        }
+        else
+        {
+            //eliminate higest voted player
+            highestVotedPlayer.isEliminated = true;
+            RoundManager.GameResult result = RoundManager.instance.CheckWinCondition();
+            
+            if(result is not RoundManager.GameResult.None)
+                RoundManager.instance.EndGame(result);
+            else
+                RoundManager.instance.NextRound();
+            
+            ResetVotes();
+
         }
 
     }
