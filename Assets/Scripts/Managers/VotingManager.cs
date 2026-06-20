@@ -42,7 +42,7 @@ public class VotingManager : MonoBehaviour
         _votesCount++;
 
         
-        if(_votesCount >= GameData.playersCount)
+        if(_votesCount >= _votes.Count)
         {
             TallyVotes();
         }
@@ -98,5 +98,16 @@ public class VotingManager : MonoBehaviour
 
         }
 
+    }
+    
+
+    public void SkipVote(Player player)
+    {
+        _votesCount++;
+        player.hasVoted = true;
+        if(_votesCount >= _votes.Count)
+        {
+            TallyVotes();
+        }
     }
 }

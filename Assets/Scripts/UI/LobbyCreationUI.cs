@@ -18,6 +18,11 @@ public class LobbyCreationUI : MonoBehaviour
     [SerializeField] private GameObject playerNameInputFiledPrefab;
     [SerializeField] private Button startGameBtn;
 
+    [SerializeField] private TextMeshProUGUI roundsSliderTxt;
+    [SerializeField] private TextMeshProUGUI playerCountSliderTxt;
+    [SerializeField] private TextMeshProUGUI imposterCountSliderTxt;
+
+
     private  int roundsCount = 2;
     private  int playersCount = 3;
     private List<string> playerNames = new List<string>();
@@ -31,19 +36,24 @@ public class LobbyCreationUI : MonoBehaviour
         playerCountSlider.onValueChanged.AddListener((value) => 
         {
             DestryAllInputFields();
-
-            playersCount = Mathf.RoundToInt(value);
+            int intValue = Mathf.RoundToInt(value);
+            playerCountSliderTxt.text = intValue.ToString();
+            playersCount = intValue;
             InstantiateInputFields(playersCount);
         });
 
         roundsSlider.onValueChanged.AddListener((value) =>
          {
-             roundsCount = Mathf.RoundToInt(value);
+             int intValue = Mathf.RoundToInt(value);
+             roundsSliderTxt.text = intValue.ToString();
+             roundsCount = intValue;
          });
 
         imposterCountSlider.onValueChanged.AddListener((value) =>
         {
-            imposterCount = Mathf.RoundToInt(value);
+            int intValue = Mathf.RoundToInt(value);
+            imposterCountSliderTxt.text = intValue.ToString();
+            imposterCount = intValue;
         });
 
         imposterWordToggle.onValueChanged.AddListener((value) =>
@@ -72,6 +82,9 @@ public class LobbyCreationUI : MonoBehaviour
 
         votingDurationInputFeild.contentType = TMP_InputField.ContentType.IntegerNumber;
         votingDurationInputFeild.ForceLabelUpdate();
+        imposterCountSliderTxt.text = imposterCount.ToString();
+        playerCountSliderTxt.text = playersCount.ToString();
+        roundsSliderTxt.text = roundsCount.ToString();
     }
 
     public void InstantiateInputFields(int count)

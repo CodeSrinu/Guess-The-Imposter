@@ -9,7 +9,8 @@ public class Timer : MonoBehaviour
     private float _timeRemaining = 0f;
     private Action _onComplete;
 
-    [SerializeField] private TextMeshProUGUI timerTxt;
+    [SerializeField] private GameObject timerTxtPrefab;
+    private TextMeshProUGUI timerTxt;
 
     public static Timer instance { get; private set; }
 
@@ -25,6 +26,11 @@ public class Timer : MonoBehaviour
 
     }
 
+    private void Start()
+    {
+        GameObject obj = Instantiate(timerTxtPrefab, transform);
+        timerTxt = obj.GetComponent<TextMeshProUGUI>();
+    }
 
     public void StartTimer(float time, Action onComplete)
     {
@@ -50,6 +56,12 @@ public class Timer : MonoBehaviour
                 DisplayTime(_timeRemaining);
                 OnTimerEnd();
             }
+            timerTxt.gameObject.SetActive(true);
+        }
+
+        if(!_isTimeRunning)
+        {
+            timerTxt.gameObject.SetActive(false);
         }
     }
 

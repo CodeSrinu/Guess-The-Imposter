@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,7 +13,11 @@ public class RoundManager : MonoBehaviour
     private GamePhase _currentPhase;
     private GameResult _gameResult;
 
+    public event Action<GamePhase> onPhaseChanged;
+
     public GamePhase currentPhase => _currentPhase;
+
+    public int CurrentPlayerIndex => _currentPlayerIndex;
 
     public static RoundManager instance;
 
@@ -27,17 +32,33 @@ public class RoundManager : MonoBehaviour
         instance = this;
     }
 
-    private void Start()
+    public void StartGame()
     {
         _currentRound = 1;
         PlayerManager.instance.InitilizeGame();
         _currentPhase = GamePhase.WordReveal;
+        onPhaseChanged?.Invoke(_currentPhase);
+
+        if(GameData.isOnline)
+            Timer.instance.StartTimer(10f, StartCluePhase);
     }
 
+
+    public void StartCluePhase()
+    {
+        //because we used _currentPlayerIndex for wordReveal in offline mode
+        //to check who is accesing the word, so we are restting it here
+        _currentPlayerIndex = 0; 
+
+
+        _currentPhase = GamePhase.Clue;
+        onPhaseChanged?.Invoke(_currentPhase);
+    }
 
     public void StartVoting()
     {
         _currentPhase = GamePhase.Voting;
+        onPhaseChanged?.Invoke(_currentPhase);
 
         if(GameData.isOnline)
             Timer.instance.StartTimer(GameData.votingDuration, VotingManager.instance.TallyVotes);
@@ -47,6 +68,7 @@ public class RoundManager : MonoBehaviour
     {
         _gameResult = result;
         _currentPhase = GamePhase.Result;
+        onPhaseChanged?.Invoke(_currentPhase);
     }
 
     public void NextRound()
@@ -61,6 +83,7 @@ public class RoundManager : MonoBehaviour
         {
             PlayerManager.instance.ResetClueStatus();
             _currentPhase = GamePhase.Clue;
+            onPhaseChanged?.Invoke(_currentPhase);
         }
     }
 
@@ -109,6 +132,15 @@ public class RoundManager : MonoBehaviour
         {
             _currentPlayerIndex = 0;
             NextRound();
+        }
+    }
+
+    public void NextWordRevealPlayer()
+    {
+        _currentPlayerIndex++;
+        if(_currentPlayerIndex >= GameData.playersCount)
+        {
+            StartCluePhase();
         }
     }
 }
