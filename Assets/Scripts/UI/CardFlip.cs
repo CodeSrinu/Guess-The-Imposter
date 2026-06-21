@@ -1,4 +1,5 @@
 using DG.Tweening;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -36,5 +37,36 @@ public class CardFlip : MonoBehaviour
         });
     }
 
+    public void SetWordText(string word)
+    {
+        TextMeshProUGUI txtComp = backPart.GetComponentInChildren<TextMeshProUGUI>();
+        txtComp.text = word;
+    }
+
+    public void SetNameText(string name)
+    {
+        TextMeshProUGUI txtComp = frontPart.transform.Find("Player name").GetComponent<TextMeshProUGUI>();
+
+
+        txtComp.gameObject.SetActive(true);
+        txtComp.text = "Pass device to " + name;
+    }
+
+    public void SetPlayerType(bool isImposter)
+    {
+        TextMeshProUGUI txtComp = backPart.transform.Find("Player Type").GetComponent<TextMeshProUGUI>();
+        txtComp.text = isImposter ? "You are Imposter" : "You are Civilian"; 
+    }
+
+    public void ResetCard()
+    {
+        if (_isFlipped)
+        {
+            Flip();
+        }
+
+        TextMeshProUGUI txtComp = frontPart.transform.Find("Player name").GetComponent<TextMeshProUGUI>(); ;
+        txtComp.gameObject.SetActive(false);
+    }
 
 }

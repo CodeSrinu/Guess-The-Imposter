@@ -81,9 +81,10 @@ public class LobbyCreationUI : MonoBehaviour
         });
 
         votingDurationInputFeild.contentType = TMP_InputField.ContentType.IntegerNumber;
+        votingDurationInputFeild.text = votingDuration.ToString();
         votingDurationInputFeild.ForceLabelUpdate();
         imposterCountSliderTxt.text = imposterCount.ToString();
-        playerCountSliderTxt.text = playersCount.ToString();
+        playerCountSliderTxt.text = "0";
         roundsSliderTxt.text = roundsCount.ToString();
     }
 

@@ -18,6 +18,7 @@ public class RoundManager : MonoBehaviour
     public GamePhase currentPhase => _currentPhase;
 
     public int CurrentPlayerIndex => _currentPlayerIndex;
+    public int CurrentRound => _currentRound;
 
     public static RoundManager instance;
 
@@ -128,7 +129,7 @@ public class RoundManager : MonoBehaviour
     {
         _currentPlayerIndex++;
 
-        if(_currentPlayerIndex >= GameData.playersCount)
+        if(_currentPlayerIndex > GameData.playersCount)
         {
             _currentPlayerIndex = 0;
             NextRound();
@@ -138,7 +139,7 @@ public class RoundManager : MonoBehaviour
     public void NextWordRevealPlayer()
     {
         _currentPlayerIndex++;
-        if(_currentPlayerIndex >= GameData.playersCount)
+        if(_currentPlayerIndex > GameData.playersCount)
         {
             StartCluePhase();
         }

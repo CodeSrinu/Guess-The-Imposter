@@ -1,0 +1,7 @@
+OVDF v1.1
+CardFlip, Assembly-CSharp
+MetaGuid:528b001781354684fba831f4fb6df4b8
+
+# frontPart
++ [Sirenix.OdinInspector.RequiredInAttribute]
+	ErrorMessage = "Front part is not assigned"

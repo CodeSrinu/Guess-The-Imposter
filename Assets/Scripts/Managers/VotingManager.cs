@@ -10,6 +10,9 @@ public class VotingManager : MonoBehaviour
 
     public static VotingManager instance;
 
+    public int EligibleVoters => _votes.Count;
+    public List<Player> EligiblePlayers => _votes.Keys.ToList();
+
     private void Awake()
     {
         if(instance != null && instance != this)
@@ -35,17 +38,18 @@ public class VotingManager : MonoBehaviour
         }
     }
 
-    public void CastVote(Player player)
+    public int CastVote(Player player)
     {
         _votes[player] += 1;
         player.hasVoted = true;
         _votesCount++;
 
-        
         if(_votesCount >= _votes.Count)
         {
-            TallyVotes();
+            Invoke("TallyVotes", 5f);
         }
+
+        return _votes[player];
     }
     
 
