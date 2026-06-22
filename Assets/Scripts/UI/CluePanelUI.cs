@@ -31,8 +31,7 @@ public class CluePanelUI : MonoBehaviour
 
         RoundManager.instance.StartVoting();
 
-        _nextPlayerBtn.gameObject.SetActive(false);
-        _votingTableBtn.gameObject.SetActive(false);
+
     }
 
 }

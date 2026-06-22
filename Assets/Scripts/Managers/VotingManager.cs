@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,10 +9,15 @@ public class VotingManager : MonoBehaviour
     private Dictionary<Player, int> _votes = new Dictionary<Player, int>();
     private int _votesCount = 0;
 
+    public event Action<Player> onPlayerEliminated;
+
     public static VotingManager instance;
 
     public int EligibleVoters => _votes.Count;
-    public List<Player> EligiblePlayers => _votes.Keys.ToList();
+    //public List<Player> EligiblePlayers => _votes.Keys.ToList();
+
+
+    
 
     private void Awake()
     {
@@ -22,10 +28,6 @@ public class VotingManager : MonoBehaviour
         }
         instance = this;
         
-    }
-    private void Start()
-    {
-        Initialize();
     }
 
 
@@ -46,7 +48,8 @@ public class VotingManager : MonoBehaviour
 
         if(_votesCount >= _votes.Count)
         {
-            Invoke("TallyVotes", 5f);
+            Invoke("TallyVotes", 1f);
+
         }
 
         return _votes[player];
@@ -86,11 +89,13 @@ public class VotingManager : MonoBehaviour
             //tie
             RoundManager.instance.NextRound();
             ResetVotes();
+            onPlayerEliminated?.Invoke(null);
         }
         else
         {
             //eliminate higest voted player
             highestVotedPlayer.isEliminated = true;
+            onPlayerEliminated?.Invoke(highestVotedPlayer);
             RoundManager.GameResult result = RoundManager.instance.CheckWinCondition();
             
             if(result is not RoundManager.GameResult.None)

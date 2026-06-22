@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class VoteBtn : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI _voteBtnTextComp;
+    [SerializeField] private TextMeshProUGUI _voterBtnTextComp;
     [SerializeField] private TextMeshProUGUI _castedVotesTextComp;
     private Player _player;
 
@@ -15,10 +15,11 @@ public class VoteBtn : MonoBehaviour
     {
         gameObject.GetComponent<Button>().onClick.AddListener(() =>
         {
-            if (!_player.hasVoted) 
+            //if (!_player.hasVoted) 
             { 
                 int count = VotingManager.instance.CastVote(_player);
                 _castedVotesTextComp.text = count.ToString();
+                RoundManager.instance.NextVoter();
 
             }
         });
@@ -28,11 +29,7 @@ public class VoteBtn : MonoBehaviour
     public void SetUp(Player player)
     {
         _player = player;
+        _voterBtnTextComp.text = _player.name;
     }
 
-    
-    public void SetVoterName()
-    {
-        _voteBtnTextComp.text = _player.name;
-    }
 }

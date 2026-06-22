@@ -9,6 +9,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject cluePanel;
     [SerializeField] private GameObject votingPanel;
     [SerializeField] private GameObject resultPanel;
+    [SerializeField] private GameObject votingResultPanel;
 
     private Player _currentPlayer;
 
@@ -46,17 +47,40 @@ public class UIManager : MonoBehaviour
         votingPanelScript.GetSkipBtn.onClick.AddListener(() =>
         {
             VotingManager.instance.SkipVote(_currentPlayer);
+            RoundManager.instance.NextVoter();
         });
         
 
 
 
         RoundManager.instance.onPhaseChanged += HandlePhaseChanged;
+        RoundManager.instance.onVoterChanged += HandleVoterChanged;
+        VotingManager.instance.onPlayerEliminated += HandlePlayerEliminated;
     }
 
     private void OnDisable()
     {
         RoundManager.instance.onPhaseChanged -= HandlePhaseChanged;
+        RoundManager.instance.onVoterChanged -= HandleVoterChanged;
+        VotingManager.instance.onPlayerEliminated -= HandlePlayerEliminated;
+
+    }
+
+    public void HandlePlayerEliminated(Player player)
+    {
+        votingResultPanel.SetActive(true);
+
+        ShowVotingResultPanel votingResultPanelScript = votingResultPanel.GetComponent<ShowVotingResultPanel>();
+        if(player == null)
+        {
+            votingResultPanelScript.SetTieResult();
+        }
+        else
+        {
+            votingResultPanelScript.SetVotingPanelResult(player);
+        }
+
+        Invoke("DisableVotingResultPanel", 4f);
     }
 
     private void HandlePhaseChanged(RoundManager.GamePhase phase)
@@ -80,9 +104,22 @@ public class UIManager : MonoBehaviour
         {
             SetUpVotingPanel();
         }
+        else if(phase == RoundManager.GamePhase.Result)
+        {
+            ResultPanelUI resultPanelUIScript = resultPanel.GetComponent<ResultPanelUI>();
+
+            resultPanelUIScript.ShowGameResult(RoundManager.instance.result);
+        }
     }
 
+    private void HandleVoterChanged(int newPlayerIndex)
+    {
+        if (newPlayerIndex >= PlayerManager.instance.GetActivePlayers().Count) return;
 
+        Player player = PlayerManager.instance.GetActivePlayers()[newPlayerIndex];
+        VotingPanelUI votingPanelUIScript = votingPanel.GetComponent<VotingPanelUI>();
+        votingPanelUIScript.SetWhosTurn(player.name);
+    }
 
 
     private void SetUpWordRevealPanel()
@@ -99,13 +136,17 @@ public class UIManager : MonoBehaviour
 
 
         //set word
-        if (GameData.canImposterHaveWord)
+        if (GameData.canImposterHaveWord && _currentPlayer.isImposter)
         {
             card.SetWordText(_currentPlayer.assignedWord);
         }
         else
         {
             card.SetWordText("You have to blend in thourgh oppenent clues");
+            if (!_currentPlayer.isImposter)
+            {
+                card.SetWordText(_currentPlayer.assignedWord);
+            }
         }
 
         //set player type
@@ -146,7 +187,13 @@ public class UIManager : MonoBehaviour
         VotingPanelUI votingPanelScript = votingPanel.GetComponent<VotingPanelUI>();
 
         votingPanelScript.DestroyAllVotingBtns();
-        votingPanelScript.InstantiateVotingBtns(VotingManager.instance.EligibleVoters, VotingManager.instance.EligiblePlayers);
+        votingPanelScript.InstantiateVotingBtns(PlayerManager.instance.GetActivePlayers());
         votingPanelScript.SetWhosTurn(_currentPlayer.name);
+    }
+
+
+    public void DisableVotingResultPanel()
+    {
+        votingResultPanel.SetActive(false);
     }
 }

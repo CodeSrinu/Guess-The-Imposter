@@ -22,13 +22,12 @@ public class VotingPanelUI : MonoBehaviour
         }
     }
 
-    public void InstantiateVotingBtns(int btnsCount, List<Player> players)
+    public void InstantiateVotingBtns(List<Player> players)
     {
-        for(int i = 0; i < btnsCount; i++)
+        foreach (Player player in players)
         {
             GameObject btn = Instantiate(_votingBtnPrefab, _votingGridContainer);
-            btn.GetComponent<VoteBtn>().SetUp(players[i]);
-            btn.GetComponent<VoteBtn>().SetVoterName();
+            btn.GetComponent<VoteBtn>().SetUp(player);
         }
     }
 

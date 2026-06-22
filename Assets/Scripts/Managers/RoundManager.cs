@@ -14,11 +14,14 @@ public class RoundManager : MonoBehaviour
     private GameResult _gameResult;
 
     public event Action<GamePhase> onPhaseChanged;
+    public event Action<int> onVoterChanged;
 
     public GamePhase currentPhase => _currentPhase;
 
     public int CurrentPlayerIndex => _currentPlayerIndex;
     public int CurrentRound => _currentRound;
+
+    public GameResult result => _gameResult;
 
     public static RoundManager instance;
 
@@ -37,6 +40,7 @@ public class RoundManager : MonoBehaviour
     {
         _currentRound = 1;
         PlayerManager.instance.InitilizeGame();
+        PlayerManager.instance.ShufflePlayerOrder();
         _currentPhase = GamePhase.WordReveal;
         onPhaseChanged?.Invoke(_currentPhase);
 
@@ -58,10 +62,13 @@ public class RoundManager : MonoBehaviour
 
     public void StartVoting()
     {
+        _currentPlayerIndex = 0;
         _currentPhase = GamePhase.Voting;
         onPhaseChanged?.Invoke(_currentPhase);
 
-        if(GameData.isOnline)
+        VotingManager.instance.Initialize();
+
+        if (GameData.isOnline)
             Timer.instance.StartTimer(GameData.votingDuration, VotingManager.instance.TallyVotes);
     }
 
@@ -129,7 +136,7 @@ public class RoundManager : MonoBehaviour
     {
         _currentPlayerIndex++;
 
-        if(_currentPlayerIndex > GameData.playersCount)
+        if(_currentPlayerIndex >= GameData.playersCount)
         {
             _currentPlayerIndex = 0;
             NextRound();
@@ -139,9 +146,15 @@ public class RoundManager : MonoBehaviour
     public void NextWordRevealPlayer()
     {
         _currentPlayerIndex++;
-        if(_currentPlayerIndex > GameData.playersCount)
+        if(_currentPlayerIndex >= GameData.playersCount)
         {
             StartCluePhase();
         }
+    }
+
+    public void NextVoter()
+    {
+        _currentPlayerIndex++;
+        onVoterChanged?.Invoke(_currentPlayerIndex);
     }
 }

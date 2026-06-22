@@ -21,6 +21,18 @@ public class PlayerManager : MonoBehaviour
     }
 
 
+    public List<Player> GetActivePlayers()
+    {
+        var list = new List<Player>();
+        foreach (Player player in PlayerManager.instance.GetPlayers)
+        {
+            if (!player.isEliminated)
+                list.Add(player);
+        }
+
+        return list;
+    }
+
     private void SetUpPlayers()
     {
         foreach(var n in GameData.playerNames)
@@ -33,14 +45,7 @@ public class PlayerManager : MonoBehaviour
 
     public void AssignImposters()
     {
-        for(int i = _players.Count - 1; i > 0; i--)
-        {
-            int randomIndex = Random.Range(0, i + 1);
-
-            var temp = _players[i];
-            _players[i] = _players[randomIndex];
-            _players[randomIndex] = temp;
-        }
+        ShufflePlayerOrder();
 
         for(int i = 0; i < GameData.imposterCount; i++)
         {
@@ -73,5 +78,33 @@ public class PlayerManager : MonoBehaviour
         SetUpPlayers();
         AssignImposters();
         AssignWords();
+    }
+
+    public List<Player> GetAllImposter()
+    {
+        List<Player> list = new List<Player>();
+
+        foreach (Player player in _players)
+        {
+            if (!player.isEliminated)
+            {
+                if(player.isImposter)
+                    list.Add(player);
+            }
+        }
+
+        return list;
+    }
+
+    public void ShufflePlayerOrder()
+    {
+        for (int i = _players.Count - 1; i > 0; i--)
+        {
+            int randomIndex = Random.Range(0, i + 1);
+
+            var temp = _players[i];
+            _players[i] = _players[randomIndex];
+            _players[randomIndex] = temp;
+        }
     }
 }
