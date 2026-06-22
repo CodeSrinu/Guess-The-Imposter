@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
@@ -109,6 +110,8 @@ public class UIManager : MonoBehaviour
             ResultPanelUI resultPanelUIScript = resultPanel.GetComponent<ResultPanelUI>();
 
             resultPanelUIScript.ShowGameResult(RoundManager.instance.result);
+
+            Invoke("RestartGame", 2f);
         }
     }
 
@@ -195,5 +198,10 @@ public class UIManager : MonoBehaviour
     public void DisableVotingResultPanel()
     {
         votingResultPanel.SetActive(false);
+    }
+
+    public void RestartGame()
+    {
+        SceneManager.LoadScene(0);
     }
 }

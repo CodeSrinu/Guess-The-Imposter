@@ -40,6 +40,8 @@ public class LobbyCreationUI : MonoBehaviour
             playerCountSliderTxt.text = intValue.ToString();
             playersCount = intValue;
             InstantiateInputFields(playersCount);
+
+            imposterCountSlider.maxValue = Mathf.RoundToInt(intValue/2);
         });
 
         roundsSlider.onValueChanged.AddListener((value) =>
