@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -12,7 +13,7 @@ public class LobbyCreationUI : MonoBehaviour
     [SerializeField] private Slider imposterCountSlider;
     [SerializeField] private TMP_InputField votingDurationInputFeild;
     [SerializeField] private Toggle imposterWordToggle;
-    [SerializeField] private Toggle isOnlineToggle;
+
 
     [SerializeField] private Transform playerNamesContainer;
     [SerializeField] private GameObject playerNameInputFiledPrefab;
@@ -28,20 +29,27 @@ public class LobbyCreationUI : MonoBehaviour
     private List<string> playerNames = new List<string>();
     private int imposterCount = 1;
     private int votingDuration = 30;
-    private bool isOnline = false;
     private bool canImposterHaveWord = false;
 
     private void Awake()
     {
+        InstantiateInputFields(1);
+
         playerCountSlider.onValueChanged.AddListener((value) => 
         {
-            DestryAllInputFields();
+            
             int intValue = Mathf.RoundToInt(value);
             playerCountSliderTxt.text = intValue.ToString();
             playersCount = intValue;
-            InstantiateInputFields(playersCount);
 
-            imposterCountSlider.maxValue = Mathf.RoundToInt(intValue/2);
+            if (!LobbyManager.instance.IsOnline)
+            {
+                DestryAllInputFields();
+                InstantiateInputFields(playersCount);
+            }
+
+
+            imposterCountSlider.maxValue = Mathf.RoundToInt(intValue / 2);
         });
 
         roundsSlider.onValueChanged.AddListener((value) =>
@@ -71,15 +79,19 @@ public class LobbyCreationUI : MonoBehaviour
                 votingDuration = 60;
         });
 
-        isOnlineToggle.onValueChanged.AddListener((value) =>
-        {
-            isOnline = value;
-        });
 
         startGameBtn.onClick.AddListener(() =>
         {
-            SaveDataToGameDataClass();
-            SceneManager.LoadScene("Game");
+            if (LobbyManager.instance.IsOnline)
+            {
+                _ = StartOnlineGameFlow();
+            }
+            else
+            {
+                SaveDataToGameDataClass();
+                SceneManager.LoadScene("Game");
+
+            }
         });
 
         votingDurationInputFeild.contentType = TMP_InputField.ContentType.IntegerNumber;
@@ -121,6 +133,13 @@ public class LobbyCreationUI : MonoBehaviour
         GameData.imposterCount = imposterCount;
         GameData.canImposterHaveWord = canImposterHaveWord;
         GameData.votingDuration = votingDuration;
-        GameData.isOnline = isOnline;
+    }
+
+    private async Task StartOnlineGameFlow()
+    {
+        SaveDataToGameDataClass();
+        string hostName = playerNamesContainer.GetChild(0).GetComponentInChildren<TextMeshProUGUI>().text;
+        await LobbyManager.instance.StartOnlineGame(hostName);
+        SceneManager.LoadScene("Lobby");
     }
 }

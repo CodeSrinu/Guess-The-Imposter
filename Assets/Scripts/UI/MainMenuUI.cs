@@ -7,20 +7,81 @@ using System.Threading.Tasks;
 using Unity.Services.Core;
 using Unity.Services.Authentication;
 using System;
+using TMPro;
 
 public class MainMenuUI : MonoBehaviour
 {
-    [SerializeField] private Button newGameBtn;
+    [SerializeField] private TextMeshProUGUI playerNameErrMsgTxt;
+    [SerializeField] private TextMeshProUGUI roomCodeErrMsgTxt;
+
+    [SerializeField] private Button createGameBtn;
+    [SerializeField] private Button joinGameBtn;
     [SerializeField] private Button exitGameBtn;
+    [SerializeField] private Button createGameCancelBtn;
+    [SerializeField] private Button joinGameCancelBtn;
+    [SerializeField] private Button onlineBtn;
+    [SerializeField] private Button localBtn;
+    [SerializeField] private Button joinRoomBtn;
+
+    [SerializeField] private TMP_InputField playerNameInputFeildComp;
+    [SerializeField] private TMP_InputField roomCodeInputFeildComp;
+
+    [SerializeField] private GameObject onlineStatusPanel;
+    [SerializeField] private GameObject joinRoomPanel;
 
     private void Awake()
     {
-        newGameBtn.onClick.AddListener(() => { 
-            goToLobbyCreationScene();
+        createGameBtn.onClick.AddListener(() =>
+        {
+            onlineStatusPanel.SetActive(true);
         });
+
+        createGameCancelBtn.onClick.AddListener(() => {
+            onlineStatusPanel.SetActive(false);
+        });
+
+        joinGameBtn.onClick.AddListener(() =>
+        {
+            joinRoomPanel.SetActive(true);
+        });
+
+        joinGameCancelBtn.onClick.AddListener(() =>
+        {
+            joinRoomPanel.SetActive(false); 
+        });
+        
         exitGameBtn.onClick.AddListener(() => {
             Application.Quit();
         });
+
+
+        onlineBtn.onClick.AddListener(() =>
+        {
+            LobbyManager.instance.IsOnline = true;
+            goToLobbyCreationScene();
+        });
+
+        localBtn.onClick.AddListener(() =>
+        {
+            LobbyManager.instance.IsOnline = false;
+            goToLobbyCreationScene();
+        });
+
+        playerNameErrMsgTxt.gameObject.SetActive(false);
+        roomCodeErrMsgTxt.gameObject.SetActive(false);
+
+        joinRoomBtn.onClick.AddListener(() => {
+            if (IsValidName())
+            {
+                playerNameErrMsgTxt.gameObject.SetActive(false);
+                _ = JoinLobbyFlow();
+            }
+            else
+            {
+                playerNameErrMsgTxt.gameObject.SetActive(true);
+            }
+        });
+
 
         _ = SignIn();
     }
@@ -28,6 +89,19 @@ public class MainMenuUI : MonoBehaviour
     public void goToLobbyCreationScene()
     {
        SceneManager.LoadScene("LobbyCreation");
+    }
+
+    public void goToLobbyScene()
+    {
+        SceneManager.LoadScene("Lobby");
+    }
+
+
+    public bool IsValidName()
+    {
+        string name = playerNameInputFeildComp.text.Trim();
+        return name.Length >= 2;
+
     }
 
     async Task SignIn()
@@ -42,8 +116,22 @@ public class MainMenuUI : MonoBehaviour
         {
             Debug.LogError("Sign in failed: " + e.Message);
         }
+    }
 
-
+    public async Task JoinLobbyFlow()
+    {
+        string roomCode = roomCodeInputFeildComp.text;
+        string playerName = playerNameInputFeildComp.text;
+        bool result = await LobbyManager.instance.JoinLobby(roomCode, playerName);
         
+        if(result)
+        {
+            roomCodeErrMsgTxt.gameObject.SetActive(false);   
+            goToLobbyScene();
+        }
+        else
+        {
+            roomCodeErrMsgTxt.gameObject.SetActive(true);
+        }
     }
 }
