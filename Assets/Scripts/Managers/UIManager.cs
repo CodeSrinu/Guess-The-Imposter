@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -45,9 +46,25 @@ public class UIManager : MonoBehaviour
         });
 
         VotingPanelUI votingPanelScript = votingPanel.GetComponent<VotingPanelUI>();
-        votingPanelScript.GetSkipBtn.onClick.AddListener(() =>
+        Button btn = votingPanelScript.GetSkipBtn;
+        TextMeshProUGUI btnVoteCountTxtComp = btn.GetComponentInChildren<TextMeshProUGUI>();
+        btn.onClick.AddListener(() =>
         {
-            VotingManager.instance.SkipVote(_currentPlayer);
+            int voteCount;
+            if (!int.TryParse(btnVoteCountTxtComp.text, out voteCount))
+            {
+                voteCount = 0;
+            }
+            voteCount++;
+            btnVoteCountTxtComp.text = voteCount.ToString();
+            if (GameData.isOnline)
+            {
+                VotingManager.instance.SkipVoteServerRpc(_currentPlayer.name);
+            }
+            else
+            {
+                VotingManager.instance.SkipVote(_currentPlayer);
+            }
             RoundManager.instance.NextVoter();
         });
         
@@ -137,23 +154,25 @@ public class UIManager : MonoBehaviour
         //reset
         card.ResetCard();
 
+        bool isImposter = GameData.isOnline ? NetworkPlayerManager.instance.isImposter : _currentPlayer.isImposter;
+        string assignedWord = GameData.isOnline ? NetworkPlayerManager.instance.assignedWord : _currentPlayer.assignedWord;
 
         //set word
-        if (GameData.canImposterHaveWord && _currentPlayer.isImposter)
+        if (GameData.canImposterHaveWord && isImposter)
         {
-            card.SetWordText(_currentPlayer.assignedWord);
+            card.SetWordText(assignedWord);
         }
         else
         {
             card.SetWordText("You have to blend in thourgh oppenent clues");
-            if (!_currentPlayer.isImposter)
+            if (!isImposter)
             {
-                card.SetWordText(_currentPlayer.assignedWord);
+                card.SetWordText(assignedWord);
             }
         }
 
         //set player type
-        card.SetPlayerType(_currentPlayer.isImposter);
+        card.SetPlayerType(isImposter);
 
 
         //set name and nextPlayerBtn

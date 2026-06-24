@@ -12,7 +12,7 @@ public class VotingPanelUI : MonoBehaviour
     [SerializeField] private Button _skipVoteBtn;
 
     public Button GetSkipBtn => _skipVoteBtn;
-
+    public Transform GetVotingGridContainer => _votingGridContainer;
 
     public void DestroyAllVotingBtns()
     {

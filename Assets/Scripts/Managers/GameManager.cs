@@ -1,9 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
-public class GameManager : MonoBehaviour
+
+public class GameManager : NetworkBehaviour
 {
     public enum GameState { Lobby, Playing, Paused, GameOver}
     private GameState _state;
@@ -23,6 +22,15 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        if (!GameData.isOnline)
+        {
+            RoundManager.instance.StartGame();
+        }
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        if (!IsHost) return;
         RoundManager.instance.StartGame();
     }
 

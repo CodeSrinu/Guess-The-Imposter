@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,18 +8,24 @@ public class VoteBtn : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _castedVotesTextComp;
     private Player _player;
 
+    public Player GetPlayer => _player;
 
     private void Start()
     {
         gameObject.GetComponent<Button>().onClick.AddListener(() =>
         {
-            //if (!_player.hasVoted) 
-            { 
-                int count = VotingManager.instance.CastVote(_player);
-                _castedVotesTextComp.text = count.ToString();
-                RoundManager.instance.NextVoter();
-
+            if (GameData.isOnline)
+            {
+                VotingManager.instance.CastVoteServerRpc(_player.name);
             }
+            else
+            {
+                int count = VotingManager.instance.CastVote(_player);
+                UpdateVoteCount(count);
+            }
+
+            RoundManager.instance.NextVoter();
+
         });
     }
 
@@ -30,6 +34,11 @@ public class VoteBtn : MonoBehaviour
     {
         _player = player;
         _voterBtnTextComp.text = _player.name;
+    }
+
+    public void UpdateVoteCount(int count)
+    {
+        _castedVotesTextComp.text = count.ToString();
     }
 
 }

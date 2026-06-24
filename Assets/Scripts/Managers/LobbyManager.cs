@@ -156,8 +156,6 @@ public class LobbyManager : MonoBehaviour
         }
         catch(Exception e)
         {
-            Debug.Log("CurrentLobby: " + _currentLobby);
-            Debug.Log("NetworkManager: " + NetworkManager.Singleton);
             Debug.LogError("Leave lobby failed: "+ e.Message);
         }
     }

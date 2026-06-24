@@ -1,10 +1,11 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class VotingManager : MonoBehaviour
+public class VotingManager : NetworkBehaviour
 {
     private Dictionary<Player, int> _votes = new Dictionary<Player, int>();
     private int _votesCount = 0;
@@ -14,7 +15,6 @@ public class VotingManager : MonoBehaviour
     public static VotingManager instance;
 
     public int EligibleVoters => _votes.Count;
-    //public List<Player> EligiblePlayers => _votes.Keys.ToList();
 
 
     
@@ -33,6 +33,7 @@ public class VotingManager : MonoBehaviour
 
     public void Initialize()
     {
+
         foreach(Player player in PlayerManager.instance.GetPlayers)
         {
             if(!player.isEliminated)
@@ -54,10 +55,55 @@ public class VotingManager : MonoBehaviour
 
         return _votes[player];
     }
-    
+
+    [ServerRpc(RequireOwnership = false)]
+    public void CastVoteServerRpc(string playerName)
+    {
+        Player player = new Player();
+        foreach(Player p in PlayerManager.instance.GetPlayers)
+        {
+            if(p.name == playerName)
+            {
+                player = p;
+                break;
+            }
+        }
+
+        if (player.hasVoted) return;
+
+
+        _votes[player] += 1;
+        player.hasVoted = true;
+
+        UpdateVoteCountClientRpc(playerName, _votes[player]);
+        _votesCount++;
+
+        if (_votesCount >= _votes.Count)
+        {
+            Invoke("TallyVotes", 1f);
+
+        }
+
+    }
+
+    [ClientRpc]
+    public void UpdateVoteCountClientRpc(string playerName, int votesCount)
+    {
+        VotingPanelUI votingPanelUIScript = FindAnyObjectByType<VotingPanelUI>();
+        Transform parent = votingPanelUIScript.GetVotingGridContainer;
+        foreach(Transform child in parent)
+        {
+            VoteBtn voteBtn = child.gameObject.GetComponent<VoteBtn>();
+            if(voteBtn.GetPlayer.name == playerName)
+            {
+                voteBtn.UpdateVoteCount(votesCount);
+            }
+        }
+    }
 
     public void ResetVotes()
     {
+        if (!IsHost) return;
         _votes.Clear();
         _votesCount = 0;
         Initialize();
@@ -68,6 +114,8 @@ public class VotingManager : MonoBehaviour
 
     public void TallyVotes()
     {
+        if (!IsHost) return;
+
         Player highestVotedPlayer = new Player();
 
         List<int> playerVotes = _votes.Values.ToList();
@@ -89,13 +137,15 @@ public class VotingManager : MonoBehaviour
             //tie
             RoundManager.instance.NextRound();
             ResetVotes();
-            onPlayerEliminated?.Invoke(null);
+            //onPlayerEliminated?.Invoke(null);
+            BroadCastEliminationClientRpc("");
         }
         else
         {
             //eliminate higest voted player
             highestVotedPlayer.isEliminated = true;
-            onPlayerEliminated?.Invoke(highestVotedPlayer);
+            //onPlayerEliminated?.Invoke(highestVotedPlayer);
+            BroadCastEliminationClientRpc(highestVotedPlayer.name);
             RoundManager.GameResult result = RoundManager.instance.CheckWinCondition();
             
             if(result is not RoundManager.GameResult.None)
@@ -117,6 +167,56 @@ public class VotingManager : MonoBehaviour
         if(_votesCount >= _votes.Count)
         {
             TallyVotes();
+        }
+    }
+
+
+    [ServerRpc(RequireOwnership = false)]
+    public void SkipVoteServerRpc(string playerName)
+    {
+
+        Player player = new Player();
+        foreach (Player p in PlayerManager.instance.GetPlayers)
+        {
+            if (p.name == playerName)
+            {
+                player = p;
+                break;
+            }
+        }
+
+        if (player.hasVoted) return;
+
+        _votesCount++;
+        player.hasVoted = true;
+
+
+        if (_votesCount >= _votes.Count)
+        {
+            TallyVotes();
+        }
+    }
+    [ClientRpc]
+    public void BroadCastEliminationClientRpc(string playerName)
+    {
+        if(playerName == "")
+        {
+            onPlayerEliminated?.Invoke(null);
+        }
+
+        Player player = new Player();
+        foreach (Player p in PlayerManager.instance.GetPlayers)
+        {
+            if (p.name == playerName)
+            {
+                player = p;
+                break;
+            }
+        }
+
+        if (player.isEliminated)
+        {
+            onPlayerEliminated?.Invoke(player);
         }
     }
 }

@@ -1,0 +1,80 @@
+using System.Collections.Generic;
+using Unity.Netcode;
+
+public class NetworkPlayerManager : NetworkBehaviour
+{
+    public NetworkList<PlayerNetworkData> Players;
+
+    public bool isImposter = false;
+    public string assignedWord = "";
+
+    private Dictionary<string, ulong> _privateClientIds = new Dictionary<string, ulong>();
+    private int _registeredClientsCount;
+
+    public static NetworkPlayerManager instance;
+
+    private void Awake()
+    {
+        Players = new NetworkList<PlayerNetworkData>();
+
+
+        if (instance != null && instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        instance = this;
+
+    }
+
+    public void PopulatePlayers()
+    {
+        if (!IsHost) return;
+
+        foreach(Player player in PlayerManager.instance.GetPlayers)
+        {
+            PlayerNetworkData playerNetworkData = new PlayerNetworkData();
+            playerNetworkData.name = player.name;
+            playerNetworkData.hasGivenClue = player.hasGiveClue;
+            playerNetworkData.hasVoted = player.hasVoted;
+            playerNetworkData.isEliminated = player.isEliminated;
+
+            Players.Add(playerNetworkData);
+        }
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void RegisterClientServerRpc(string playerName, ulong clientId)
+    {
+        _privateClientIds.Add(playerName, clientId);
+        _registeredClientsCount++;
+        if (_registeredClientsCount >= GameData.playersCount)
+        {
+            SendPrivateDataToAll();
+        }
+    }
+
+    private void SendPrivateDataToAll()
+    {
+        foreach (Player player in PlayerManager.instance.GetPlayers)
+        {
+            ClientRpcParams rpcParams = new ClientRpcParams
+            {
+                Send = new ClientRpcSendParams
+                {
+                    TargetClientIds = new ulong[] { _privateClientIds[player.name] }
+                }
+            };
+            ReceivePrivateDataClientRpc(player.isImposter, player.assignedWord, rpcParams);
+        }
+        RoundManager.instance.StartWorRevealPhase();
+    }
+
+    [ClientRpc]
+    private void ReceivePrivateDataClientRpc(bool _isImposter, string _assignedWord, ClientRpcParams rpcParams)
+    {
+        isImposter = _isImposter;
+        assignedWord = _assignedWord;
+    }
+
+}

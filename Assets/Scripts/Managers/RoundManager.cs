@@ -1,22 +1,26 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
+using Unity.Services.Authentication;
+using Unity.Services.Lobbies.Models;
 using UnityEngine;
 
-public class RoundManager : MonoBehaviour
+
+public class RoundManager : NetworkBehaviour
 {
     private int _currentPlayerIndex;
     private int _currentRound;
     public enum GamePhase { WordReveal, Clue, Voting, Result}
     public enum GameResult { None, ImpostersWon, CiviliansWon}
 
-    private GamePhase _currentPhase;
+    private NetworkVariable<GamePhase> _currentPhase = new NetworkVariable<GamePhase>();
     private GameResult _gameResult;
 
     public event Action<GamePhase> onPhaseChanged;
     public event Action<int> onVoterChanged;
 
-    public GamePhase currentPhase => _currentPhase;
+    public GamePhase currentPhase => _currentPhase.Value;
 
     public int CurrentPlayerIndex => _currentPlayerIndex;
     public int CurrentRound => _currentRound;
@@ -25,46 +29,83 @@ public class RoundManager : MonoBehaviour
 
     public static RoundManager instance;
 
+    
+
+
     private void Awake()
     {
         if(instance != null && instance != this)
         {
-            Destroy(instance );
+            Destroy(gameObject);
             return;
         }
 
         instance = this;
     }
 
+    public override void OnNetworkSpawn()
+    {
+        _currentPhase.OnValueChanged += (previousValue, newValue) =>
+        {
+            onPhaseChanged?.Invoke(newValue);
+        };
+
+        onPhaseChanged?.Invoke(_currentPhase.Value);
+
+
+        Lobby lobby = LobbyManager.instance.CurrentLobby;
+        string myName = "";
+        foreach(var player in lobby.Players)
+        {
+            if(player.Id == AuthenticationService.Instance.PlayerId)
+            {
+                myName = player.Data["PlayerName"].Value;
+                break;
+;           }
+        }
+
+        NetworkPlayerManager.instance.RegisterClientServerRpc(myName, NetworkManager.Singleton.LocalClientId);
+    }
+
+
     public void StartGame()
     {
+        if(!IsHost) return;
+
         _currentRound = 1;
         PlayerManager.instance.InitilizeGame();
         PlayerManager.instance.ShufflePlayerOrder();
-        _currentPhase = GamePhase.WordReveal;
-        onPhaseChanged?.Invoke(_currentPhase);
+        NetworkPlayerManager.instance.PopulatePlayers();
+        
 
         if(GameData.isOnline)
             Timer.instance.StartTimer(10f, StartCluePhase);
     }
 
+    public void StartWorRevealPhase()
+    {
+        if(IsHost) return;
+        _currentPhase.Value = GamePhase.WordReveal;
+    }
 
     public void StartCluePhase()
     {
+        if (!IsHost) return;
+
+
         //because we used _currentPlayerIndex for wordReveal in offline mode
         //to check who is accesing the word, so we are restting it here
         _currentPlayerIndex = 0; 
-
-
-        _currentPhase = GamePhase.Clue;
-        onPhaseChanged?.Invoke(_currentPhase);
+        _currentPhase.Value = GamePhase.Clue;
     }
 
     public void StartVoting()
     {
+        if (!IsHost) return;
+
         _currentPlayerIndex = 0;
-        _currentPhase = GamePhase.Voting;
-        onPhaseChanged?.Invoke(_currentPhase);
+        _currentPhase.Value = GamePhase.Voting;
+
 
         VotingManager.instance.Initialize();
 
@@ -74,13 +115,17 @@ public class RoundManager : MonoBehaviour
 
     public void EndGame(GameResult result)
     {
+        if (!IsHost) return;
+
         _gameResult = result;
-        _currentPhase = GamePhase.Result;
-        onPhaseChanged?.Invoke(_currentPhase);
+        _currentPhase.Value = GamePhase.Result;
+
     }
 
     public void NextRound()
     {
+        if (!IsHost) return;
+
         _currentRound++;
 
         if(_currentRound > GameData.roundsCount)
@@ -90,8 +135,7 @@ public class RoundManager : MonoBehaviour
         else
         {
             PlayerManager.instance.ResetClueStatus();
-            _currentPhase = GamePhase.Clue;
-            onPhaseChanged?.Invoke(_currentPhase);
+            _currentPhase.Value = GamePhase.Clue;
         }
     }
 
