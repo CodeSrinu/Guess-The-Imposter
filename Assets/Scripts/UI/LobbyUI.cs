@@ -32,7 +32,6 @@ public class LobbyUI : MonoBehaviour
         {
             if (LobbyManager.instance.CurrentLobby.Players.Count >= 3)
             {
-                LobbyManager.instance.StopPolling();
                 NetworkManager.Singleton.SceneManager.LoadScene("Game", LoadSceneMode.Single);
             }
         });
@@ -46,9 +45,8 @@ public class LobbyUI : MonoBehaviour
     private void Start()
     {
         startBtn.gameObject.SetActive(NetworkManager.Singleton.IsHost);
-
-        LobbyManager.instance.onLobbyUpdated += HandleLobbyChange;
         LobbyManager.instance.StartPolling();
+        LobbyManager.instance.onLobbyUpdated += HandleLobbyChange;
     }
 
     private void OnDestroy()

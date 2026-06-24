@@ -43,6 +43,34 @@ public class RoundManager : NetworkBehaviour
         instance = this;
     }
 
+    private void Start()
+    {
+        if (GameData.isOnline)
+        {
+            Lobby lobby = LobbyManager.instance.CurrentLobby;
+            string myName = "";
+
+            if (IsHost)
+            {
+                myName = GameData.playerNames[0];
+            }
+            else
+            {
+                foreach (var player in lobby.Players)
+                {
+                    if (player.Id == AuthenticationService.Instance.PlayerId)
+                    {
+                        myName = player.Data["PlayerName"].Value;
+                        Debug.Log("My name found: " + myName);
+                        break;
+                    }
+                }
+            }
+
+            NetworkPlayerManager.instance.RegisterClientServerRpc(myName, NetworkManager.Singleton.LocalClientId);
+        }
+    }
+
     public override void OnNetworkSpawn()
     {
         _currentPhase.OnValueChanged += (previousValue, newValue) =>
@@ -53,28 +81,23 @@ public class RoundManager : NetworkBehaviour
         onPhaseChanged?.Invoke(_currentPhase.Value);
 
 
-        Lobby lobby = LobbyManager.instance.CurrentLobby;
-        string myName = "";
-        foreach(var player in lobby.Players)
-        {
-            if(player.Id == AuthenticationService.Instance.PlayerId)
-            {
-                myName = player.Data["PlayerName"].Value;
-                break;
-;           }
-        }
-
-        NetworkPlayerManager.instance.RegisterClientServerRpc(myName, NetworkManager.Singleton.LocalClientId);
+        
     }
 
 
     public void StartGame()
     {
-        if(!IsHost) return;
+
+        Debug.Log("Player names count: " + GameData.playerNames.Count);
+        foreach (var n in GameData.playerNames) Debug.Log("Player name: " + n);
 
         _currentRound = 1;
         PlayerManager.instance.InitilizeGame();
         PlayerManager.instance.ShufflePlayerOrder();
+
+        if(!IsHost) return;
+
+        LobbyManager.instance.StopPolling();
         NetworkPlayerManager.instance.PopulatePlayers();
         
 
@@ -84,7 +107,7 @@ public class RoundManager : NetworkBehaviour
 
     public void StartWorRevealPhase()
     {
-        if(IsHost) return;
+        if(!IsHost) return;
         _currentPhase.Value = GamePhase.WordReveal;
     }
 

@@ -130,6 +130,7 @@ public class UIManager : MonoBehaviour
 
             Invoke("RestartGame", 2f);
         }
+        Debug.Log("HandlePhaseChanged: " + phase);
     }
 
     private void HandleVoterChanged(int newPlayerIndex)

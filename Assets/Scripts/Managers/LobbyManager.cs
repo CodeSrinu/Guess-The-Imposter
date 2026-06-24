@@ -179,6 +179,7 @@ public class LobbyManager : MonoBehaviour
 
     public async Task PollLobby()
     {
+        Debug.Log("Inside Poll Lobby, curent lobby = " +  _currentLobby);
         while(_currentLobby != null)
         {
             await Task.Delay(1500);

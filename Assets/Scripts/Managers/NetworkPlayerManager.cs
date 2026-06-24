@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Unity.Netcode;
+using UnityEngine;
 
 public class NetworkPlayerManager : NetworkBehaviour
 {
@@ -68,6 +69,8 @@ public class NetworkPlayerManager : NetworkBehaviour
             ReceivePrivateDataClientRpc(player.isImposter, player.assignedWord, rpcParams);
         }
         RoundManager.instance.StartWorRevealPhase();
+        LobbyManager.instance.StartPolling();
+        Debug.Log("SendPrivateDataToAll called");
     }
 
     [ClientRpc]
