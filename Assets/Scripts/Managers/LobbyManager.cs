@@ -137,6 +137,31 @@ public class LobbyManager : MonoBehaviour
         }
     }
 
+
+    public async Task LeaveLobby()
+    {
+        try
+        {
+            if (NetworkManager.Singleton.IsHost)
+            {
+                await LobbyService.Instance.DeleteLobbyAsync(_currentLobby.Id);
+            }
+            else
+            {
+                await LobbyService.Instance.RemovePlayerAsync(_currentLobby.Id, AuthenticationService.Instance.PlayerId);
+            }
+            _currentLobby = null;
+            StopPolling();
+            NetworkManager.Singleton.Shutdown();
+        }
+        catch(Exception e)
+        {
+            Debug.Log("CurrentLobby: " + _currentLobby);
+            Debug.Log("NetworkManager: " + NetworkManager.Singleton);
+            Debug.LogError("Leave lobby failed: "+ e.Message);
+        }
+    }
+
     private async void StartHeartBeat()
     {
         while (_currentLobby != null)

@@ -109,7 +109,10 @@ public class MainMenuUI : MonoBehaviour
         try
         {
             await UnityServices.InitializeAsync();
-            await AuthenticationService.Instance.SignInAnonymouslyAsync();
+            if (!AuthenticationService.Instance.IsSignedIn)
+            {
+                await AuthenticationService.Instance.SignInAnonymouslyAsync();
+            }
             Debug.Log("Signed in as: " + AuthenticationService.Instance.PlayerId);
         }
         catch(Exception e)

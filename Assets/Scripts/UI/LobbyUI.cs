@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using TMPro;
 using Unity.Netcode;
 using Unity.Services.Lobbies.Models;
@@ -11,6 +12,7 @@ public class LobbyUI : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI playersJoinedTxtComp;
     [SerializeField] private TextMeshProUGUI roomCodeTxtComp;
+    [SerializeField] private TextMeshProUGUI remainiingSlotsTxtComp;
 
     [SerializeField] private Transform joinedPlayersContainer;
     [SerializeField] private Transform annoucementContainer;
@@ -20,6 +22,7 @@ public class LobbyUI : MonoBehaviour
     [SerializeField] private GameObject announcementTxtPrefab;
 
     [SerializeField] private Button startBtn;
+    [SerializeField] private Button leaveLobbyBtn;
 
     private List<string> _prevPlayerNames = new List<string>();
 
@@ -33,6 +36,11 @@ public class LobbyUI : MonoBehaviour
                 NetworkManager.Singleton.SceneManager.LoadScene("Game", LoadSceneMode.Single);
             }
         });
+
+        leaveLobbyBtn.onClick.AddListener(() =>
+        {
+            _ = LeaveLobbyFlow();
+        });
     }
 
     private void Start()
@@ -43,9 +51,18 @@ public class LobbyUI : MonoBehaviour
         LobbyManager.instance.StartPolling();
     }
 
+    private void OnDestroy()
+    {
+        LobbyManager.instance.onLobbyUpdated -= HandleLobbyChange;
+
+    }
+
     private void HandleLobbyChange()
     {
+        Debug.Log("HandleLobbyChange fired. Lobby null: " + (LobbyManager.instance.CurrentLobby == null));
+
         Lobby lobby = LobbyManager.instance.CurrentLobby;
+        if (lobby == null) return;
 
         int playerJoined = lobby.Players.Count;
         string roomCode = lobby.LobbyCode;
@@ -54,11 +71,12 @@ public class LobbyUI : MonoBehaviour
 
         foreach(var player in  lobby.Players)
         {
-            playerNames.Add(player.Data["PlayerName"].Value);
+            playerNames.Add(player.Data["PlayerName"].Value.Trim());
         }
 
-        playersJoinedTxtComp.text = playerJoined.ToString();
-        roomCodeTxtComp.text = roomCode;
+        playersJoinedTxtComp.text = "Players Joined: " + playerJoined.ToString();
+        roomCodeTxtComp.text = "Room Code: "+ roomCode;
+        remainiingSlotsTxtComp.text =  "Slots Remaining: " + (GameData.playersCount - playerJoined);
 
         DestroyJoinedPlayerNames();
         for(int i = 0; i < playerNames.Count; i++)
@@ -66,11 +84,16 @@ public class LobbyUI : MonoBehaviour
             InstantiateJoinedPlayers(playerNames[i]);
         }
 
+        for (int i = 0;i < (GameData.playersCount - playerJoined); i++)
+        {
+            InstantiateJoinedPlayers("Free Player Slot");
+        }
+
         foreach(string p in playerNames)
         {
             if (!_prevPlayerNames.Contains(p))
             {
-                InstantiateAnnoucement(p + "joined the lobby");
+                InstantiateAnnoucement(p + " joined the lobby");
             }
         }
 
@@ -78,7 +101,7 @@ public class LobbyUI : MonoBehaviour
         {
             if (!playerNames.Contains(p))
             {
-                InstantiateAnnoucement(p + "left the lobby");
+                InstantiateAnnoucement(p + " left the lobby");
             }
         }
 
@@ -96,13 +119,24 @@ public class LobbyUI : MonoBehaviour
     private void InstantiateJoinedPlayers(string name)
     {
         GameObject obj = Instantiate(joinedPlayerPrefab, joinedPlayersContainer);
-        obj.GetComponent<TextMeshProUGUI>().text = name;
+        obj.GetComponentInChildren<TextMeshProUGUI>().text = name;
     }
     private void InstantiateAnnoucement(string annoucement)
     {
 
         GameObject obj = Instantiate(announcementTxtPrefab, annoucementContainer);
         obj.GetComponent<TextMeshProUGUI>().text = annoucement;
+        StartCoroutine(DestroyAccouncement(obj));   
+    }
+    private IEnumerator DestroyAccouncement(GameObject obj)
+    {
+        yield return new WaitForSeconds(2);
+        Destroy(obj);
+    }
 
+    private async Task LeaveLobbyFlow()
+    {
+        await LobbyManager.instance.LeaveLobby();
+        SceneManager.LoadScene("MainMenu");
     }
 }
