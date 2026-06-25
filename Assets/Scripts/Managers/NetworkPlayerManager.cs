@@ -49,6 +49,8 @@ public class NetworkPlayerManager : NetworkBehaviour
     [ClientRpc]
     public void SyncPlayerNamesToClientsClientRpc(FixedString64Bytes[] names)
     {
+            Debug.Log("SyncPlayerNamesToClientsClientRpc received, count: " + names.Length);
+
         List<string> playerNames = names.Select(x => x.ToString()).ToList<string>();
 
         GameData.playerNames = playerNames;
@@ -67,6 +69,7 @@ public class NetworkPlayerManager : NetworkBehaviour
             FixedString64Bytes[] orderedNames = PlayerManager.instance.GetPlayers
                 .Select(p => new FixedString64Bytes(p.name))
                 .ToArray();
+            Debug.Log("Calling SyncPlayerNamesToClientsClientRpc with: " + string.Join(", ", orderedNames));
             SyncPlayerNamesToClientsClientRpc(orderedNames);
             SendPrivateDataToAll();
         }

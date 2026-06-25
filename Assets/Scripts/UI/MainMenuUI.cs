@@ -129,7 +129,8 @@ public class MainMenuUI : MonoBehaviour
         
         if(result)
         {
-            roomCodeErrMsgTxt.gameObject.SetActive(false);   
+            roomCodeErrMsgTxt.gameObject.SetActive(false); 
+            GameData.isOnline = true;
             goToLobbyScene();
         }
         else

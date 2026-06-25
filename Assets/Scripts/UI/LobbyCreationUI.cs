@@ -144,6 +144,7 @@ public class LobbyCreationUI : MonoBehaviour
         GameData.imposterCount = imposterCount;
         GameData.canImposterHaveWord = canImposterHaveWord;
         GameData.votingDuration = votingDuration;
+        GameData.isOnline = LobbyManager.instance.IsOnline;
     }
 
     private async Task StartOnlineGameFlow()
