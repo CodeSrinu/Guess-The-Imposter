@@ -57,8 +57,6 @@ public class LobbyUI : MonoBehaviour
 
     private void HandleLobbyChange()
     {
-        Debug.Log("HandleLobbyChange fired. Lobby null: " + (LobbyManager.instance.CurrentLobby == null));
-
         Lobby lobby = LobbyManager.instance.CurrentLobby;
         if (lobby == null) return;
 

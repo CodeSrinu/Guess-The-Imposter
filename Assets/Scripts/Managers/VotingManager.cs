@@ -141,7 +141,7 @@ public class VotingManager : NetworkBehaviour
                 onPlayerEliminated?.Invoke(null);
             }
             BroadCastEliminationClientRpc("");
-            RoundManager.instance.StartClueAfterVoting();
+            RoundManager.instance.StartClueAfterVote();
         }
         else
         {
@@ -170,7 +170,7 @@ public class VotingManager : NetworkBehaviour
             RoundManager.instance.EndGame(result);
         else
         {
-            RoundManager.instance.StartClueAfterVoting();
+            RoundManager.instance.StartClueAfterVote();
         }
 
         ResetVotes();

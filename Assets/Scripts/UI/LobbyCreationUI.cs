@@ -82,6 +82,8 @@ public class LobbyCreationUI : MonoBehaviour
 
         startGameBtn.onClick.AddListener(() =>
         {
+            if (playerNamesContainer.GetChild(0).GetComponentInChildren<TextMeshProUGUI>().text.Trim() != "")
+
             if (LobbyManager.instance.IsOnline)
             {
                 _ = StartOnlineGameFlow();
@@ -98,7 +100,7 @@ public class LobbyCreationUI : MonoBehaviour
         votingDurationInputFeild.text = votingDuration.ToString();
         votingDurationInputFeild.ForceLabelUpdate();
         imposterCountSliderTxt.text = imposterCount.ToString();
-        playerCountSliderTxt.text = "0";
+        playerCountSliderTxt.text = playersCount.ToString();
         roundsSliderTxt.text = roundsCount.ToString();
     }
 

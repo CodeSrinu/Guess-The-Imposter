@@ -73,7 +73,8 @@ public class LobbyManager : MonoBehaviour
             {"RoundsCount", new DataObject(DataObject.VisibilityOptions.Member, GameData.roundsCount.ToString()) },
             {"ImposterCount", new DataObject(DataObject.VisibilityOptions.Member, GameData.imposterCount.ToString()) },
             {"VotingDuration", new DataObject(DataObject.VisibilityOptions.Member, GameData.votingDuration.ToString()) },
-            {"CanImposterHaveWord", new DataObject(DataObject.VisibilityOptions.Member, GameData.canImposterHaveWord.ToString()) }
+            {"CanImposterHaveWord", new DataObject(DataObject.VisibilityOptions.Member, GameData.canImposterHaveWord.ToString())},
+            {"PlayersCount", new DataObject(DataObject.VisibilityOptions.Member, GameData.playersCount.ToString()) } 
         };
 
             Dictionary<string, PlayerDataObject> hostPlayerData = new Dictionary<string, PlayerDataObject>
@@ -128,6 +129,14 @@ public class LobbyManager : MonoBehaviour
 
             unityTransport.SetRelayServerData(relayServerData);
             NetworkManager.Singleton.StartClient();
+
+            GameData.roundsCount = int.Parse(_currentLobby.Data["RoundsCount"].Value);
+            GameData.imposterCount = int.Parse(_currentLobby.Data["ImposterCount"].Value);
+            GameData.votingDuration = float.Parse(_currentLobby.Data["VotingDuration"].Value);
+            GameData.canImposterHaveWord = bool.Parse(_currentLobby.Data["CanImposterHaveWord"].Value);
+            GameData.playersCount = int.Parse(_currentLobby.Data["PlayersCount"].Value);
+
+
             return true;
         }
         catch (Exception e)

@@ -84,13 +84,13 @@ public class RoundManager : NetworkBehaviour
 
     public void StartGame()
     {
+        if(!IsHost && GameData.isOnline) return;
+
         _currentRound = 1;
         PlayerManager.instance.InitilizeGame();
         PlayerManager.instance.ShufflePlayerOrder();
 
         StartWorRevealPhase();
-
-        if(!IsHost) return;
 
         LobbyManager.instance.StopPolling();
         NetworkPlayerManager.instance.PopulatePlayers();
@@ -239,15 +239,6 @@ public class RoundManager : NetworkBehaviour
     {
         _currentPlayerIndex++;
         onVoterChanged?.Invoke(_currentPlayerIndex);
-    }
-
-    public void StartClueAfterVoting()
-    {
-        if (!IsHost && GameData.isOnline) return;
-
-        _currentPlayerIndex = 0;
-        PlayerManager.instance.ResetClueStatus();
-        SetPhase(GamePhase.Clue);
     }
 
     public void SetPhase(GamePhase phase)
