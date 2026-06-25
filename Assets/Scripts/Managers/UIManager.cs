@@ -62,14 +62,8 @@ public class UIManager : MonoBehaviour
             }
             voteCount++;
             btnVoteCountTxtComp.text = voteCount.ToString();
-            if (GameData.isOnline)
-            {
-                VotingManager.instance.SkipVoteServerRpc(_currentPlayer.name);
-            }
-            else
-            {
-                VotingManager.instance.SkipVote(_currentPlayer);
-            }
+            Invoke("VoteBasedOnIsOnline", 1f);
+            
         });
         
 
@@ -102,7 +96,11 @@ public class UIManager : MonoBehaviour
             votingResultPanelScript.SetVotingPanelResult(player);
         }
 
-        Invoke("DisableVotingResultPanel", 4f);
+        VotingPanelUI votingPanelScript = votingPanel.GetComponent<VotingPanelUI>();
+        Button btn = votingPanelScript.GetSkipBtn;
+        TextMeshProUGUI btnVoteCountTxtComp = btn.GetComponentInChildren<TextMeshProUGUI>();
+        btnVoteCountTxtComp.text = "0";
+        Invoke("DisableVotingResultPanel", 3f);
     }
 
     private void HandlePhaseChanged(RoundManager.GamePhase phase)
@@ -130,9 +128,8 @@ public class UIManager : MonoBehaviour
         {
             ResultPanelUI resultPanelUIScript = resultPanel.GetComponent<ResultPanelUI>();
 
-            resultPanelUIScript.ShowGameResult(RoundManager.instance.result);
-
-            Invoke("RestartGame", 2f);
+            StartCoroutine(resultPanelUIScript.ShowGameResult(RoundManager.instance.result));
+            
         }
         Debug.Log("HandlePhaseChanged: " + phase);
     }
@@ -229,5 +226,17 @@ public class UIManager : MonoBehaviour
     public void RestartGame()
     {
         SceneManager.LoadScene(0);
+    }
+
+    public void VoteBasedOnIsOnline()
+    {
+        if (GameData.isOnline)
+        {
+            VotingManager.instance.SkipVoteServerRpc(_currentPlayer.name);
+        }
+        else
+        {
+            VotingManager.instance.SkipVote(_currentPlayer);
+        }
     }
 }

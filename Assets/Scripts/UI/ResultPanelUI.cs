@@ -7,8 +7,11 @@ public class ResultPanelUI : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI winTextComp;
 
-    public void ShowGameResult(RoundManager.GameResult result)
+    public IEnumerator ShowGameResult(RoundManager.GameResult result)
     {
         winTextComp.text = result is RoundManager.GameResult.ImpostersWon ? "Imposters Won" : "Civilians Won";
+
+        yield return new WaitForSeconds(2f);
+        UIManager.instance.RestartGame();
     }
 }

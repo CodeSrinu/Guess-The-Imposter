@@ -41,4 +41,6 @@ public class VoteBtn : MonoBehaviour
         _castedVotesTextComp.text = count.ToString();
     }
 
+
+
 }

@@ -146,9 +146,9 @@ public class RoundManager : NetworkBehaviour
 
         _currentPlayerIndex = 0;
 
+        _currentRound++;
         if (!isInitialRoundsDone)
         {
-            _currentRound++;
             if(_currentRound > GameData.roundsCount)
             {
                 isInitialRoundsDone = true;

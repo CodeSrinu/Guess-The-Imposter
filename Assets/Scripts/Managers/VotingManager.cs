@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
@@ -150,23 +151,32 @@ public class VotingManager : NetworkBehaviour
             {
                 onPlayerEliminated?.Invoke(highestVotedPlayer);
             }
-            BroadCastEliminationClientRpc(highestVotedPlayer.name);
-            RoundManager.GameResult result = RoundManager.instance.CheckWinCondition();
             
-            if(result is not RoundManager.GameResult.None)
-                RoundManager.instance.EndGame(result);
-            else
-            {   
-
-                RoundManager.instance.StartClueAfterVoting();
-            }
-
-            ResetVotes();
+            StartCoroutine(FinishVoting(highestVotedPlayer.name));
 
         }
 
     }
+
+    public IEnumerator FinishVoting(string name)
+    {
+        BroadCastEliminationClientRpc(name);
+
+        yield return new WaitForSeconds(3f);
+
+        RoundManager.GameResult result = RoundManager.instance.CheckWinCondition();
+
+        if (result is not RoundManager.GameResult.None)
+            RoundManager.instance.EndGame(result);
+        else
+        {
+            RoundManager.instance.StartClueAfterVoting();
+        }
+
+        ResetVotes();
+    }
     
+
 
     public void SkipVote(Player player)
     {

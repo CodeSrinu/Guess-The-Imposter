@@ -35,4 +35,5 @@ public class VotingPanelUI : MonoBehaviour
     {
         voterNameTextComp.text = name + "\' turn to vote";
     }
+
 }
