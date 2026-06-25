@@ -32,6 +32,11 @@ public class UIManager : MonoBehaviour
     {
         Button nxtPlayerBtn = wordRevealPanel.GetComponentInChildren<Button>();
         nxtPlayerBtn.onClick.AddListener(() => { 
+            if(RoundManager.instance.CurrentPlayerIndex == PlayerManager.instance.GetActivePlayers().Count - 2)
+            {
+                nxtPlayerBtn.GetComponentInChildren<TextMeshProUGUI>().text = "Start Clue Rounds";
+            }
+
             RoundManager.instance.NextWordRevealPlayer();
             SetUpWordRevealPanel(); 
         });
@@ -65,7 +70,6 @@ public class UIManager : MonoBehaviour
             {
                 VotingManager.instance.SkipVote(_currentPlayer);
             }
-            RoundManager.instance.NextVoter();
         });
         
 
@@ -135,6 +139,8 @@ public class UIManager : MonoBehaviour
 
     private void HandleVoterChanged(int newPlayerIndex)
     {
+        Debug.Log("HandleVoterChanged: newPlayerIndex=" + newPlayerIndex + " activeCount=" + PlayerManager.instance.GetActivePlayers().Count);
+
         if (newPlayerIndex >= PlayerManager.instance.GetActivePlayers().Count) return;
 
         Player player = PlayerManager.instance.GetActivePlayers()[newPlayerIndex];
@@ -145,10 +151,10 @@ public class UIManager : MonoBehaviour
 
     private void SetUpWordRevealPanel()
     {
-        if (RoundManager.instance.CurrentPlayerIndex >= GameData.playersCount) return;
+        if (RoundManager.instance.CurrentPlayerIndex >= PlayerManager.instance.GetActivePlayers().Count) return;
 
         
-        _currentPlayer = PlayerManager.instance.GetPlayers[RoundManager.instance.CurrentPlayerIndex];
+        _currentPlayer = PlayerManager.instance.GetActivePlayers()[RoundManager.instance.CurrentPlayerIndex];
         CardFlip card = wordRevealPanel.transform.GetComponentInChildren<CardFlip>();
         Button nextPlayerBtn = wordRevealPanel.transform.GetComponentInChildren<Button>();
 
@@ -191,9 +197,9 @@ public class UIManager : MonoBehaviour
 
     private void SetUpCluePanel()
     {
-        if (RoundManager.instance.CurrentPlayerIndex >= GameData.playersCount) return;
+        if (RoundManager.instance.CurrentPlayerIndex >= PlayerManager.instance.GetActivePlayers().Count) return;
 
-        _currentPlayer = PlayerManager.instance.GetPlayers[RoundManager.instance.CurrentPlayerIndex];
+        _currentPlayer = PlayerManager.instance.GetActivePlayers()[RoundManager.instance.CurrentPlayerIndex];
 
         CluePanelUI cluePanelScript = cluePanel.GetComponent<CluePanelUI>();
 
@@ -204,9 +210,9 @@ public class UIManager : MonoBehaviour
 
     private void SetUpVotingPanel()
     {
-        if (RoundManager.instance.CurrentPlayerIndex >= GameData.playersCount) return;
+        if (RoundManager.instance.CurrentPlayerIndex >= PlayerManager.instance.GetActivePlayers().Count) return;
 
-        _currentPlayer = PlayerManager.instance.GetPlayers[RoundManager.instance.CurrentPlayerIndex];
+        _currentPlayer = PlayerManager.instance.GetActivePlayers()[RoundManager.instance.CurrentPlayerIndex];
         VotingPanelUI votingPanelScript = votingPanel.GetComponent<VotingPanelUI>();
 
         votingPanelScript.DestroyAllVotingBtns();

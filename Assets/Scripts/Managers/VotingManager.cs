@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.UI;
+
 
 public class VotingManager : NetworkBehaviour
 {
@@ -103,7 +103,7 @@ public class VotingManager : NetworkBehaviour
 
     public void ResetVotes()
     {
-        if (!IsHost) return;
+        if (!IsHost && GameData.isOnline) return;
         _votes.Clear();
         _votesCount = 0;
         Initialize();
@@ -114,14 +114,13 @@ public class VotingManager : NetworkBehaviour
 
     public void TallyVotes()
     {
-        if (!IsHost) return;
+        if (!IsHost && GameData.isOnline) return;
 
         Player highestVotedPlayer = new Player();
 
         List<int> playerVotes = _votes.Values.ToList();
         List<Player> highestVotedPlayersList = new List<Player>();
 
-        foreach (int vote in playerVotes) Debug.Log(vote);
 
         foreach(Player player in _votes.Keys)
         {
@@ -135,24 +134,33 @@ public class VotingManager : NetworkBehaviour
         if(highestVotedPlayersList.Count > 1)
         {
             //tie
-            RoundManager.instance.NextRound();
             ResetVotes();
-            //onPlayerEliminated?.Invoke(null);
+            if (!GameData.isOnline)
+            {
+                onPlayerEliminated?.Invoke(null);
+            }
             BroadCastEliminationClientRpc("");
+            RoundManager.instance.StartClueAfterVoting();
         }
         else
         {
             //eliminate higest voted player
             highestVotedPlayer.isEliminated = true;
-            //onPlayerEliminated?.Invoke(highestVotedPlayer);
+            if(!GameData.isOnline)
+            {
+                onPlayerEliminated?.Invoke(highestVotedPlayer);
+            }
             BroadCastEliminationClientRpc(highestVotedPlayer.name);
             RoundManager.GameResult result = RoundManager.instance.CheckWinCondition();
             
             if(result is not RoundManager.GameResult.None)
                 RoundManager.instance.EndGame(result);
             else
-                RoundManager.instance.NextRound();
-            
+            {   
+
+                RoundManager.instance.StartClueAfterVoting();
+            }
+
             ResetVotes();
 
         }
@@ -167,6 +175,10 @@ public class VotingManager : NetworkBehaviour
         if(_votesCount >= _votes.Count)
         {
             TallyVotes();
+        }
+        else
+        {
+            RoundManager.instance.NextVoter();
         }
     }
 

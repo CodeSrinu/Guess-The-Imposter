@@ -23,7 +23,7 @@ public class CluePanelUI : MonoBehaviour
 
     public void SetCurrentRound(int currentRound)
     {
-        _currentRoundTxtComp.text = "Round" + currentRound;
+        _currentRoundTxtComp.text = "Round " + currentRound;
     }
 
     public void OpenVotingTable()

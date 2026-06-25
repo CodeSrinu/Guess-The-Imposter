@@ -19,7 +19,7 @@ public class RoundManager : NetworkBehaviour
 
     public event Action<GamePhase> onPhaseChanged;
     public event Action<int> onVoterChanged;
-
+    public bool isInitialRoundsDone = false;
     public GamePhase currentPhase => _currentPhase.Value;
 
     public int CurrentPlayerIndex => _currentPlayerIndex;
@@ -78,22 +78,17 @@ public class RoundManager : NetworkBehaviour
             onPhaseChanged?.Invoke(newValue);
         };
 
-        onPhaseChanged?.Invoke(_currentPhase.Value);
-
-
-        
+        onPhaseChanged?.Invoke(_currentPhase.Value);   
     }
 
 
     public void StartGame()
     {
-
-        Debug.Log("Player names count: " + GameData.playerNames.Count);
-        foreach (var n in GameData.playerNames) Debug.Log("Player name: " + n);
-
         _currentRound = 1;
         PlayerManager.instance.InitilizeGame();
         PlayerManager.instance.ShufflePlayerOrder();
+
+        StartWorRevealPhase();
 
         if(!IsHost) return;
 
@@ -107,27 +102,27 @@ public class RoundManager : NetworkBehaviour
 
     public void StartWorRevealPhase()
     {
-        if(!IsHost) return;
-        _currentPhase.Value = GamePhase.WordReveal;
+        if(!IsHost && GameData.isOnline) return;
+        SetPhase(GamePhase.WordReveal);
     }
 
     public void StartCluePhase()
     {
-        if (!IsHost) return;
+        if (!IsHost && GameData.isOnline) return;
 
 
         //because we used _currentPlayerIndex for wordReveal in offline mode
         //to check who is accesing the word, so we are restting it here
-        _currentPlayerIndex = 0; 
-        _currentPhase.Value = GamePhase.Clue;
+        _currentPlayerIndex = 0;
+        SetPhase(GamePhase.Clue);
     }
 
     public void StartVoting()
     {
-        if (!IsHost) return;
+        if (!IsHost && GameData.isOnline) return;
 
         _currentPlayerIndex = 0;
-        _currentPhase.Value = GamePhase.Voting;
+        SetPhase(GamePhase.Voting);
 
 
         VotingManager.instance.Initialize();
@@ -138,30 +133,46 @@ public class RoundManager : NetworkBehaviour
 
     public void EndGame(GameResult result)
     {
-        if (!IsHost) return;
+        if (!IsHost && GameData.isOnline) return;
 
         _gameResult = result;
-        _currentPhase.Value = GamePhase.Result;
+        SetPhase(GamePhase.Result);
 
     }
 
     public void NextRound()
     {
-        if (!IsHost) return;
+        if (!IsHost && GameData.isOnline) return;
 
-        _currentRound++;
+        _currentPlayerIndex = 0;
 
-        if(_currentRound > GameData.roundsCount)
+        if (!isInitialRoundsDone)
         {
-            StartVoting();
+            _currentRound++;
+            if(_currentRound > GameData.roundsCount)
+            {
+                isInitialRoundsDone = true;
+                StartVoting();
+            }
+            else
+            {
+                SetPhase(GamePhase.Clue);
+            }
         }
         else
         {
-            PlayerManager.instance.ResetClueStatus();
-            _currentPhase.Value = GamePhase.Clue;
+            StartVoting();
         }
     }
+    public void StartClueAfterVote()
+    {
+        if (!IsHost && GameData.isOnline) return;
 
+        _currentPlayerIndex = 0;
+
+        PlayerManager.instance.ResetClueStatus();
+        SetPhase(GamePhase.Clue);
+    }
     public GameResult CheckWinCondition()
     {
         int remainingImposters = 0;
@@ -201,9 +212,13 @@ public class RoundManager : NetworkBehaviour
 
     public void NextPlayerClue()
     {
-        _currentPlayerIndex++;
 
-        if(_currentPlayerIndex >= GameData.playersCount)
+        _currentPlayerIndex++;
+        // In NextPlayerClue
+        Debug.Log("NextPlayerClue: index=" + _currentPlayerIndex + " activeCount=" + PlayerManager.instance.GetActivePlayers().Count);
+
+
+        if (_currentPlayerIndex >= PlayerManager.instance.GetActivePlayers().Count)
         {
             _currentPlayerIndex = 0;
             NextRound();
@@ -213,7 +228,8 @@ public class RoundManager : NetworkBehaviour
     public void NextWordRevealPlayer()
     {
         _currentPlayerIndex++;
-        if(_currentPlayerIndex >= GameData.playersCount)
+
+        if (_currentPlayerIndex >= PlayerManager.instance.GetActivePlayers().Count)
         {
             StartCluePhase();
         }
@@ -223,5 +239,23 @@ public class RoundManager : NetworkBehaviour
     {
         _currentPlayerIndex++;
         onVoterChanged?.Invoke(_currentPlayerIndex);
+    }
+
+    public void StartClueAfterVoting()
+    {
+        if (!IsHost && GameData.isOnline) return;
+
+        _currentPlayerIndex = 0;
+        PlayerManager.instance.ResetClueStatus();
+        SetPhase(GamePhase.Clue);
+    }
+
+    public void SetPhase(GamePhase phase)
+    {
+        _currentPhase.Value = phase;
+        if (!GameData.isOnline)
+        {
+            onPhaseChanged?.Invoke(phase);
+        }
     }
 }
