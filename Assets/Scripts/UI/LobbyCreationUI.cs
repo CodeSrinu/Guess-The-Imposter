@@ -33,11 +33,18 @@ public class LobbyCreationUI : MonoBehaviour
 
     private void Awake()
     {
-        InstantiateInputFields(1);
-
-        playerCountSlider.onValueChanged.AddListener((value) => 
+        if (LobbyManager.instance.IsOnline)
         {
-            
+            InstantiateInputFields(1);
+        }
+        else
+        {
+            InstantiateInputFields(playersCount);
+        }
+
+        playerCountSlider.onValueChanged.AddListener((value) =>
+        {
+
             int intValue = Mathf.RoundToInt(value);
             playerCountSliderTxt.text = intValue.ToString();
             playersCount = intValue;
@@ -102,6 +109,8 @@ public class LobbyCreationUI : MonoBehaviour
         imposterCountSliderTxt.text = imposterCount.ToString();
         playerCountSliderTxt.text = playersCount.ToString();
         roundsSliderTxt.text = roundsCount.ToString();
+
+
     }
 
     public void InstantiateInputFields(int count)

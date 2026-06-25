@@ -43,6 +43,13 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
+    public void SetUpPlayersOnly()
+    {
+        _players.Clear();
+        SetUpPlayers();
+
+    }
+
     public void AssignImposters()
     {
         ShufflePlayerOrder();

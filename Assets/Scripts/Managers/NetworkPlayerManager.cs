@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Linq;
+using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -44,6 +46,17 @@ public class NetworkPlayerManager : NetworkBehaviour
         }
     }
 
+    [ClientRpc]
+    public void SyncPlayerNamesToClientsClientRpc(FixedString64Bytes[] names)
+    {
+        List<string> playerNames = names.Select(x => x.ToString()).ToList<string>();
+
+        GameData.playerNames = playerNames;
+        PlayerManager.instance.SetUpPlayersOnly();
+    }
+
+
+
     [ServerRpc(RequireOwnership = false)]
     public void RegisterClientServerRpc(string playerName, ulong clientId)
     {
@@ -51,6 +64,10 @@ public class NetworkPlayerManager : NetworkBehaviour
         _registeredClientsCount++;
         if (_registeredClientsCount >= GameData.playersCount)
         {
+            FixedString64Bytes[] orderedNames = PlayerManager.instance.GetPlayers
+                .Select(p => new FixedString64Bytes(p.name))
+                .ToArray();
+            SyncPlayerNamesToClientsClientRpc(orderedNames);
             SendPrivateDataToAll();
         }
     }
