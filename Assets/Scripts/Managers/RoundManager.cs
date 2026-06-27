@@ -50,18 +50,26 @@ public class RoundManager : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        StartCoroutine(RegisterAfterSpawn());
+        if(GameData.isOnline && !IsHost)
+        {
+            StartCoroutine(RegisterAfterSpawn());
+        }
+
+
         _currentPhase.OnValueChanged += (previousValue, newValue) =>
         {
             onPhaseChanged?.Invoke(newValue);
         };
 
-        onPhaseChanged?.Invoke(_currentPhase.Value);   
+        if (!IsHost)
+        {
+            onPhaseChanged?.Invoke(_currentPhase.Value);
+        }
     }
 
     private IEnumerator RegisterAfterSpawn()
     {
-        yield return null;
+        yield return new WaitUntil(() => NetworkPlayerManager.instance != null && NetworkPlayerManager.instance.IsSpawned);
         if (GameData.isOnline && !IsHost)
         {
             Lobby lobby = LobbyManager.instance.CurrentLobby;
@@ -265,12 +273,7 @@ public class RoundManager : NetworkBehaviour
     public void SetPhase(GamePhase phase)
     {
         _currentPhase.Value = phase;
-
-        if (!GameData.isOnline)
-        {
-            onPhaseChanged?.Invoke(phase);
-        }
-
+        onPhaseChanged?.Invoke(phase);
     }
 
 

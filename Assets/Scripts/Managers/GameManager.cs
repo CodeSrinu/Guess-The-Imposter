@@ -18,6 +18,7 @@ public class GameManager : NetworkBehaviour
         }
 
         instance = this;
+        Application.runInBackground = true;
     }
 
     private void Start()

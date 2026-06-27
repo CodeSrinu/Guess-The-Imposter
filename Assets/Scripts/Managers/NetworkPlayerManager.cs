@@ -81,15 +81,13 @@ public class NetworkPlayerManager : NetworkBehaviour
     [ClientRpc]
     public void StartTimerClientRpc()
     {
+        if (IsHost) return;
         Timer.instance.StartTimer(10f, null);
     }
 
     private void SendPrivateDataToAll()
     {
-        string hostName = GameData.playerNames[0];
-        Player hostPlayer = PlayerManager.instance.GetPlayers.Find(p => p.name == hostName);
-        isImposter = hostPlayer.isImposter;
-        assignedWord = hostPlayer.assignedWord;
+        
 
         foreach (Player player in PlayerManager.instance.GetPlayers)
         {
@@ -105,6 +103,13 @@ public class NetworkPlayerManager : NetworkBehaviour
             };
             Debug.Log("Sending to " + player.name + " isImposter: " + player.isImposter + " word: " + player.assignedWord);
             ReceivePrivateDataClientRpc(player.isImposter, player.assignedWord, rpcParams);
+        }
+
+        Player hostPlayer = PlayerManager.instance.GetPlayers.Find(p => !_privateClientIds.ContainsKey(p.name));
+        if (hostPlayer != null)
+        {
+            isImposter = hostPlayer.isImposter;
+            assignedWord = hostPlayer.assignedWord;
         }
         Debug.Log("SendPrivateDataToAll, player count: " + PlayerManager.instance.GetPlayers.Count);
         Debug.Log("Host data before phase: isImposter=" + isImposter + " word=" + assignedWord);

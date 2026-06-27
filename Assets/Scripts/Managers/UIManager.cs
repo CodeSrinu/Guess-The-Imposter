@@ -27,7 +27,7 @@ public class UIManager : MonoBehaviour
         }
 
         instance = this;
-        GameData.ResetData();
+
     }
 
     private void Start()
@@ -239,6 +239,7 @@ public class UIManager : MonoBehaviour
 
     public void RestartGame()
     {
+        GameData.ResetData();
         SceneManager.LoadScene(0);
     }
 

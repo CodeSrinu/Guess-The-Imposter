@@ -128,7 +128,12 @@ public class LobbyManager : MonoBehaviour
             RelayServerData relayServerData = new RelayServerData(joinAllocation, "dtls");
 
             unityTransport.SetRelayServerData(relayServerData);
+            NetworkManager.Singleton.OnClientConnectedCallback += (id) => {
+                Debug.Log("Client connected: " + id);
+            };
+
             NetworkManager.Singleton.StartClient();
+            Debug.Log("StartClient called, IsClient: " + NetworkManager.Singleton.IsClient);
 
             GameData.roundsCount = int.Parse(_currentLobby.Data["RoundsCount"].Value);
             GameData.imposterCount = int.Parse(_currentLobby.Data["ImposterCount"].Value);

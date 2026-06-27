@@ -57,6 +57,7 @@ public class PlayerManager : MonoBehaviour
         for(int i = 0; i < GameData.imposterCount; i++)
         {
             _players[i].isImposter = true;
+            Debug.Log("ImposterCount: " + GameData.imposterCount + " players: " + _players.Count);
         }
 
     }
