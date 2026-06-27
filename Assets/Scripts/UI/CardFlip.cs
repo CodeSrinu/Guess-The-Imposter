@@ -45,11 +45,12 @@ public class CardFlip : MonoBehaviour
 
     public void SetNameText(string name)
     {
+        string txt = name != "" ? "Pass device to " + name : "";
+
         TextMeshProUGUI txtComp = frontPart.transform.Find("Player name").GetComponent<TextMeshProUGUI>();
 
-
         txtComp.gameObject.SetActive(true);
-        txtComp.text = "Pass device to " + name;
+        txtComp.text = txt;
     }
 
     public void SetPlayerType(bool isImposter)

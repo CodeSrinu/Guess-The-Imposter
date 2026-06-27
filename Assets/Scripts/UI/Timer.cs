@@ -28,7 +28,8 @@ public class Timer : MonoBehaviour
     private void Start()
     {
         GameObject obj = Instantiate(timerTxtPrefab, transform);
-        timerTxt = obj.GetComponent<TextMeshProUGUI>();
+        timerTxt = obj.GetComponentInChildren<TextMeshProUGUI>();
+        if (timerTxt == null) Debug.Log("Timer txt comp is null");
     }
 
     public void StartTimer(float time, Action onComplete)

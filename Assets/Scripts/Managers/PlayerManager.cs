@@ -66,10 +66,12 @@ public class PlayerManager : MonoBehaviour
     {
         WordPair pair = WordManager.instance.GetRandomWordPair();
 
-        foreach(Player player in _players)
+        Debug.Log("AssignWords pair: normal=" + pair.normal + " imposter=" + pair.imposter);
+        foreach (Player player in _players)
         {
             if (player.isImposter) player.assignedWord = pair.imposter;
             else player.assignedWord = pair.normal;
+            Debug.Log(player.name + " assigned word: " + player.assignedWord);
         }
     }
 

@@ -1866,6 +1866,7 @@ RectTransform:
   - {fileID: 545304243}
   - {fileID: 1488668400}
   - {fileID: 1333843418}
+  - {fileID: 1675279394}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -3073,7 +3074,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1406586083}
-  - component: {fileID: 1406586082}
   - component: {fileID: 1406586084}
   m_Layer: 0
   m_Name: UI Manager
@@ -3082,19 +3082,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1406586082
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1406586081}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 49339980668a42740b96a14c6085f446, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  timerTxtPrefab: {fileID: 3761361459183930197, guid: 3deb33cd59e5f7b4e8e85ff6c35cab83, type: 3}
 --- !u!4 &1406586083
 Transform:
   m_ObjectHideFlags: 0
@@ -3555,6 +3542,55 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1648138605}
   m_CullTransparentMesh: 1
+--- !u!1 &1675279393
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1675279394}
+  - component: {fileID: 1675279395}
+  m_Layer: 5
+  m_Name: Timer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1675279394
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1675279393}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 704473678}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1675279395
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1675279393}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49339980668a42740b96a14c6085f446, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  timerTxtPrefab: {fileID: 3761361459183930197, guid: 3deb33cd59e5f7b4e8e85ff6c35cab83, type: 3}
 --- !u!1 &1725726536
 GameObject:
   m_ObjectHideFlags: 0

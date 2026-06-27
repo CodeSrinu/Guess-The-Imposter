@@ -37,7 +37,7 @@ public class NetworkPlayerManager : NetworkBehaviour
         foreach(Player player in PlayerManager.instance.GetPlayers)
         {
             PlayerNetworkData playerNetworkData = new PlayerNetworkData();
-            playerNetworkData.name = player.name;
+            playerNetworkData.name = player.name.Trim();
             playerNetworkData.hasGivenClue = player.hasGiveClue;
             playerNetworkData.hasVoted = player.hasVoted;
             playerNetworkData.isEliminated = player.isEliminated;
@@ -49,7 +49,9 @@ public class NetworkPlayerManager : NetworkBehaviour
     [ClientRpc]
     public void SyncPlayerNamesToClientsClientRpc(FixedString64Bytes[] names)
     {
-            Debug.Log("SyncPlayerNamesToClientsClientRpc received, count: " + names.Length);
+        if(IsHost) return;
+
+        Debug.Log("SyncPlayerNamesToClientsClientRpc received, names: " + string.Join(", ", names));
 
         List<string> playerNames = names.Select(x => x.ToString()).ToList<string>();
 
@@ -62,9 +64,10 @@ public class NetworkPlayerManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void RegisterClientServerRpc(string playerName, ulong clientId)
     {
+        Debug.Log("RegisterClientServerRpc called, name: " + playerName + " count now: " + (_registeredClientsCount + 1) + " needed: " + (GameData.playerNames.Count - 1));
         _privateClientIds.Add(playerName, clientId);
         _registeredClientsCount++;
-        if (_registeredClientsCount >= GameData.playersCount)
+        if (_registeredClientsCount >= GameData.playerNames.Count - 1)
         {
             FixedString64Bytes[] orderedNames = PlayerManager.instance.GetPlayers
                 .Select(p => new FixedString64Bytes(p.name))
@@ -75,10 +78,24 @@ public class NetworkPlayerManager : NetworkBehaviour
         }
     }
 
+    [ClientRpc]
+    public void StartTimerClientRpc()
+    {
+        Timer.instance.StartTimer(10f, null);
+    }
+
     private void SendPrivateDataToAll()
     {
+        string hostName = GameData.playerNames[0];
+        Player hostPlayer = PlayerManager.instance.GetPlayers.Find(p => p.name == hostName);
+        isImposter = hostPlayer.isImposter;
+        assignedWord = hostPlayer.assignedWord;
+
         foreach (Player player in PlayerManager.instance.GetPlayers)
         {
+            if (!_privateClientIds.ContainsKey(player.name)) continue;
+
+
             ClientRpcParams rpcParams = new ClientRpcParams
             {
                 Send = new ClientRpcSendParams
@@ -86,11 +103,14 @@ public class NetworkPlayerManager : NetworkBehaviour
                     TargetClientIds = new ulong[] { _privateClientIds[player.name] }
                 }
             };
+            Debug.Log("Sending to " + player.name + " isImposter: " + player.isImposter + " word: " + player.assignedWord);
             ReceivePrivateDataClientRpc(player.isImposter, player.assignedWord, rpcParams);
         }
-        RoundManager.instance.StartWorRevealPhase();
-        LobbyManager.instance.StartPolling();
-        Debug.Log("SendPrivateDataToAll called");
+        Debug.Log("SendPrivateDataToAll, player count: " + PlayerManager.instance.GetPlayers.Count);
+        Debug.Log("Host data before phase: isImposter=" + isImposter + " word=" + assignedWord);
+        RoundManager.instance.StartWordRevealPhase();
+
+
     }
 
     [ClientRpc]
@@ -98,6 +118,9 @@ public class NetworkPlayerManager : NetworkBehaviour
     {
         isImposter = _isImposter;
         assignedWord = _assignedWord;
+        UIManager.instance.SetUpWordRevealPanel();
     }
 
+
+    
 }

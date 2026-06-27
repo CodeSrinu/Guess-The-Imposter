@@ -9,4 +9,17 @@ public static class GameData
     public static bool canImposterHaveWord = false;
     public static bool isOnline = false;
     public static float votingDuration = 30f;
+
+
+    public static void ResetData()
+    {
+        roundsCount = 0;
+        playersCount = 0;
+        imposterCount = 0;
+        canImposterHaveWord = false;
+        votingDuration = 0.0f;
+        playerNames.Clear();
+    }
 }
+
+

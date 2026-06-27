@@ -136,7 +136,7 @@ public class LobbyCreationUI : MonoBehaviour
     {
         foreach(Transform child  in playerNamesContainer)
         {
-            playerNames.Add(child.GetComponentInChildren<TMP_InputField>().text);
+            playerNames.Add(child.GetComponentInChildren<TMP_InputField>().text.Trim().Replace("\u200B", "").Replace("\u200C", "").Replace("\u200D", ""));
         }
         GameData.playerNames = playerNames;
         GameData.playersCount = playersCount;

@@ -45,34 +45,12 @@ public class RoundManager : NetworkBehaviour
 
     private void Start()
     {
-        if (GameData.isOnline)
-        {
-            Lobby lobby = LobbyManager.instance.CurrentLobby;
-            string myName = "";
-
-            if (IsHost)
-            {
-                myName = GameData.playerNames[0];
-            }
-            else
-            {
-                foreach (var player in lobby.Players)
-                {
-                    if (player.Id == AuthenticationService.Instance.PlayerId)
-                    {
-                        myName = player.Data["PlayerName"].Value;
-                        Debug.Log("My name found: " + myName);
-                        break;
-                    }
-                }
-            }
-
-            NetworkPlayerManager.instance.RegisterClientServerRpc(myName, NetworkManager.Singleton.LocalClientId);
-        }
+        
     }
 
     public override void OnNetworkSpawn()
     {
+        StartCoroutine(RegisterAfterSpawn());
         _currentPhase.OnValueChanged += (previousValue, newValue) =>
         {
             onPhaseChanged?.Invoke(newValue);
@@ -81,29 +59,72 @@ public class RoundManager : NetworkBehaviour
         onPhaseChanged?.Invoke(_currentPhase.Value);   
     }
 
+    private IEnumerator RegisterAfterSpawn()
+    {
+        yield return null;
+        if (GameData.isOnline && !IsHost)
+        {
+            Lobby lobby = LobbyManager.instance.CurrentLobby;
+            string myName = "";
+
+            foreach (var player in lobby.Players)
+            {
+                if (player.Id == AuthenticationService.Instance.PlayerId)
+                {
+                    myName = player.Data["PlayerName"].Value.Trim().Replace("\u200B", "").Replace("\u200C", "").Replace("\u200D", "");
+                    Debug.Log("My name found: " + myName);
+                    break;
+                }
+            }
+            if (!IsHost)
+            {
+
+                NetworkPlayerManager.instance.RegisterClientServerRpc(myName, NetworkManager.Singleton.LocalClientId);
+            }
+        }
+    }
 
     public void StartGame()
     {
         if(!IsHost && GameData.isOnline) return;
 
+        Debug.Log("StartGame called, playerNames count: " + GameData.playerNames.Count);
+
         _currentRound = 1;
+
+        if(GameData.isOnline)
+        {
+            GameData.playerNames.Clear();
+            foreach(var player in LobbyManager.instance.CurrentLobby.Players)
+            {
+                GameData.playerNames.Add(player.Data["PlayerName"].Value.Trim().Replace("\u200B", "").Replace("\u200C", "").Replace("\u200D", ""));
+            }
+        }
+        LobbyManager.instance.StopPolling();
+        Debug.Log("After populating, playerNames: " + string.Join(", ", GameData.playerNames));
+
         PlayerManager.instance.InitilizeGame();
         PlayerManager.instance.ShufflePlayerOrder();
 
-        StartWorRevealPhase();
 
-        LobbyManager.instance.StopPolling();
-        NetworkPlayerManager.instance.PopulatePlayers();
         
-
-        if(GameData.isOnline)
-            Timer.instance.StartTimer(10f, StartCluePhase);
+        NetworkPlayerManager.instance.PopulatePlayers();
+        if (!GameData.isOnline)
+        {
+            StartWordRevealPhase();
+        }
     }
 
-    public void StartWorRevealPhase()
+    public void StartWordRevealPhase()
     {
         if(!IsHost && GameData.isOnline) return;
         SetPhase(GamePhase.WordReveal);
+
+        if (GameData.isOnline)
+        {
+            Timer.instance.StartTimer(10f, StartCluePhase);
+            NetworkPlayerManager.instance.StartTimerClientRpc();
+        }
     }
 
     public void StartCluePhase()
@@ -244,9 +265,18 @@ public class RoundManager : NetworkBehaviour
     public void SetPhase(GamePhase phase)
     {
         _currentPhase.Value = phase;
+
         if (!GameData.isOnline)
         {
             onPhaseChanged?.Invoke(phase);
         }
+
+    }
+
+
+    [ClientRpc]
+    public void NextPlayerClueClientRpc()
+    {
+        NextPlayerClue();
     }
 }

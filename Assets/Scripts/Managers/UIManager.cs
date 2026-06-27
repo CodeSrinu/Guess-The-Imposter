@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -26,15 +27,16 @@ public class UIManager : MonoBehaviour
         }
 
         instance = this;
+        GameData.ResetData();
     }
 
     private void Start()
     {
-        Button nxtPlayerBtn = wordRevealPanel.GetComponentInChildren<Button>();
-        nxtPlayerBtn.onClick.AddListener(() => { 
+        Button wordRevealNxtPlayerBtn = wordRevealPanel.GetComponentInChildren<Button>();
+        wordRevealNxtPlayerBtn.onClick.AddListener(() => { 
             if(RoundManager.instance.CurrentPlayerIndex == PlayerManager.instance.GetActivePlayers().Count - 2)
             {
-                nxtPlayerBtn.GetComponentInChildren<TextMeshProUGUI>().text = "Start Clue Rounds";
+                wordRevealNxtPlayerBtn.GetComponentInChildren<TextMeshProUGUI>().text = "Start Clue Rounds";
             }
 
             RoundManager.instance.NextWordRevealPlayer();
@@ -43,8 +45,16 @@ public class UIManager : MonoBehaviour
 
         CluePanelUI cluePanelScript = cluePanel.GetComponent<CluePanelUI>();
         cluePanelScript.GetNextPlayerBtn.onClick.AddListener(() => {
-            RoundManager.instance.NextPlayerClue();
-            SetUpCluePanel();
+
+            if (!GameData.isOnline)
+            {
+                RoundManager.instance.NextPlayerClue();
+            }
+            else
+            {
+                RoundManager.instance.NextPlayerClueClientRpc();
+            }
+                SetUpCluePanel();
         });
         cluePanelScript.GetVotingTableBtn.onClick.AddListener(() => {
             cluePanelScript.OpenVotingTable();
@@ -103,7 +113,7 @@ public class UIManager : MonoBehaviour
         Invoke("DisableVotingResultPanel", 3f);
     }
 
-    private void HandlePhaseChanged(RoundManager.GamePhase phase)
+    public void HandlePhaseChanged(RoundManager.GamePhase phase)
     {
         wordRevealPanel.SetActive(phase == RoundManager.GamePhase.WordReveal);
         cluePanel.SetActive(phase == RoundManager.GamePhase.Clue);
@@ -134,7 +144,7 @@ public class UIManager : MonoBehaviour
         Debug.Log("HandlePhaseChanged: " + phase);
     }
 
-    private void HandleVoterChanged(int newPlayerIndex)
+    public void HandleVoterChanged(int newPlayerIndex)
     {
         Debug.Log("HandleVoterChanged: newPlayerIndex=" + newPlayerIndex + " activeCount=" + PlayerManager.instance.GetActivePlayers().Count);
 
@@ -146,7 +156,7 @@ public class UIManager : MonoBehaviour
     }
 
 
-    private void SetUpWordRevealPanel()
+    public void SetUpWordRevealPanel()
     {
         if (RoundManager.instance.CurrentPlayerIndex >= PlayerManager.instance.GetActivePlayers().Count) return;
 
@@ -160,6 +170,8 @@ public class UIManager : MonoBehaviour
 
         bool isImposter = GameData.isOnline ? NetworkPlayerManager.instance.isImposter : _currentPlayer.isImposter;
         string assignedWord = GameData.isOnline ? NetworkPlayerManager.instance.assignedWord : _currentPlayer.assignedWord;
+
+        Debug.Log($"Wordreveal panel, isImposter:{isImposter} assignedWord:{assignedWord}");
 
         //set word
         if (GameData.canImposterHaveWord && isImposter)
@@ -187,15 +199,17 @@ public class UIManager : MonoBehaviour
         }
         else
         {
+            card.SetNameText("");
             nextPlayerBtn.gameObject.SetActive(false);
         }
     }
 
 
-    private void SetUpCluePanel()
+    public void SetUpCluePanel()
     {
         if (RoundManager.instance.CurrentPlayerIndex >= PlayerManager.instance.GetActivePlayers().Count) return;
 
+        if(NetworkManager.Singleton.IsHost) Debug.Log("host called SetupCluePanel");
         _currentPlayer = PlayerManager.instance.GetActivePlayers()[RoundManager.instance.CurrentPlayerIndex];
 
         CluePanelUI cluePanelScript = cluePanel.GetComponent<CluePanelUI>();
@@ -205,7 +219,7 @@ public class UIManager : MonoBehaviour
     }
 
 
-    private void SetUpVotingPanel()
+    public void SetUpVotingPanel()
     {
         if (RoundManager.instance.CurrentPlayerIndex >= PlayerManager.instance.GetActivePlayers().Count) return;
 
