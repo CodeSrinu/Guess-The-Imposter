@@ -9,6 +9,7 @@ public static class GameData
     public static bool canImposterHaveWord = false;
     public static bool isOnline = false;
     public static float votingDuration = 30f;
+    public static string devicePlayerName = "";
 
 
     public static void ResetData()
@@ -18,6 +19,7 @@ public static class GameData
         imposterCount = 0;
         canImposterHaveWord = false;
         votingDuration = 0.0f;
+        devicePlayerName = "";
         playerNames.Clear();
     }
 }

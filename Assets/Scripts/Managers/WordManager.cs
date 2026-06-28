@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Newtonsoft.Json;
+using System.Linq;
 
 public class WordManager : MonoBehaviour
 {
@@ -28,8 +29,23 @@ public class WordManager : MonoBehaviour
 
     public WordPair GetRandomWordPair()
     {
-        int randomIndex = Random.Range(0, _wordPairs.Count);
-        return _wordPairs[randomIndex];
+        
+        string[] targetCategoriesForNow = { "TOLLYWOOD",
+                                            "TOLLYWOOD CELEBRITIES",
+                                            "TELUGU MOVIE CHARACTERS",
+                                            "ANDHRA/TELANGANA FOOD",
+                                            "ANDHRA/TELANGANA PLACES",
+                                            "TELUGU STATES CULTURE & DAILY LIFE",
+                                            "TELUGU RELATIONS & SLANG",
+                                            "TECHNOLOGY & GADGETS",
+                                            "ANIMALS & NATURE",
+                                            "PROFESSIONS"
+                                            };
+        List<WordPair> filteredList = _wordPairs.Where(p => targetCategoriesForNow.Contains(p.category)).ToList();
+        int randomIndex = Random.Range(0, filteredList.Count);
+
+        return filteredList[randomIndex];
+
     }
 
 

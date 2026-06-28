@@ -9,8 +9,8 @@ using UnityEngine;
 
 public class RoundManager : NetworkBehaviour
 {
-    private int _currentPlayerIndex;
-    private int _currentRound;
+    private NetworkVariable<int> _currentPlayerIndex = new NetworkVariable<int>();
+    private NetworkVariable<int> _currentRound = new NetworkVariable<int>();
     public enum GamePhase { WordReveal, Clue, Voting, Result}
     public enum GameResult { None, ImpostersWon, CiviliansWon}
 
@@ -22,8 +22,8 @@ public class RoundManager : NetworkBehaviour
     public bool isInitialRoundsDone = false;
     public GamePhase currentPhase => _currentPhase.Value;
 
-    public int CurrentPlayerIndex => _currentPlayerIndex;
-    public int CurrentRound => _currentRound;
+    public int CurrentPlayerIndex => _currentPlayerIndex.Value;
+    public int CurrentRound => _currentRound.Value;
 
     public GameResult result => _gameResult;
 
@@ -61,6 +61,20 @@ public class RoundManager : NetworkBehaviour
             onPhaseChanged?.Invoke(newValue);
         };
 
+        _currentPlayerIndex.OnValueChanged += (previousValue, newValue) =>
+        {
+            if (IsHost) return;
+
+            if (_currentPhase.Value == GamePhase.Clue)
+            {
+                UIManager.instance.SetUpCluePanel();
+            }
+            else if(_currentPhase.Value == GamePhase.Voting)
+            {
+                UIManager.instance.HandleVoterChanged(newValue);
+            }
+        };
+
         if (!IsHost)
         {
             onPhaseChanged?.Invoke(_currentPhase.Value);
@@ -80,7 +94,7 @@ public class RoundManager : NetworkBehaviour
                 if (player.Id == AuthenticationService.Instance.PlayerId)
                 {
                     myName = player.Data["PlayerName"].Value.Trim().Replace("\u200B", "").Replace("\u200C", "").Replace("\u200D", "");
-                    Debug.Log("My name found: " + myName);
+                    GameData.devicePlayerName = myName;
                     break;
                 }
             }
@@ -98,7 +112,7 @@ public class RoundManager : NetworkBehaviour
 
         Debug.Log("StartGame called, playerNames count: " + GameData.playerNames.Count);
 
-        _currentRound = 1;
+        _currentRound.Value = 1;
 
         if(GameData.isOnline)
         {
@@ -130,7 +144,6 @@ public class RoundManager : NetworkBehaviour
 
         if (GameData.isOnline)
         {
-            Timer.instance.StartTimer(10f, StartCluePhase);
             NetworkPlayerManager.instance.StartTimerClientRpc();
         }
     }
@@ -142,7 +155,7 @@ public class RoundManager : NetworkBehaviour
 
         //because we used _currentPlayerIndex for wordReveal in offline mode
         //to check who is accesing the word, so we are restting it here
-        _currentPlayerIndex = 0;
+        _currentPlayerIndex.Value = 0;
         SetPhase(GamePhase.Clue);
     }
 
@@ -150,7 +163,7 @@ public class RoundManager : NetworkBehaviour
     {
         if (!IsHost && GameData.isOnline) return;
 
-        _currentPlayerIndex = 0;
+        _currentPlayerIndex.Value = 0;
         SetPhase(GamePhase.Voting);
 
 
@@ -173,12 +186,12 @@ public class RoundManager : NetworkBehaviour
     {
         if (!IsHost && GameData.isOnline) return;
 
-        _currentPlayerIndex = 0;
+        _currentPlayerIndex.Value = 0;
 
-        _currentRound++;
+        _currentRound.Value++;
         if (!isInitialRoundsDone)
         {
-            if(_currentRound > GameData.roundsCount)
+            if(_currentRound.Value > GameData.roundsCount)
             {
                 isInitialRoundsDone = true;
                 StartVoting();
@@ -197,7 +210,7 @@ public class RoundManager : NetworkBehaviour
     {
         if (!IsHost && GameData.isOnline) return;
 
-        _currentPlayerIndex = 0;
+        _currentPlayerIndex.Value = 0;
 
         PlayerManager.instance.ResetClueStatus();
         SetPhase(GamePhase.Clue);
@@ -242,23 +255,23 @@ public class RoundManager : NetworkBehaviour
     public void NextPlayerClue()
     {
 
-        _currentPlayerIndex++;
+        _currentPlayerIndex.Value++;
         // In NextPlayerClue
         Debug.Log("NextPlayerClue: index=" + _currentPlayerIndex + " activeCount=" + PlayerManager.instance.GetActivePlayers().Count);
 
 
-        if (_currentPlayerIndex >= PlayerManager.instance.GetActivePlayers().Count)
+        if (_currentPlayerIndex.Value >= PlayerManager.instance.GetActivePlayers().Count)
         {
-            _currentPlayerIndex = 0;
+            _currentPlayerIndex.Value = 0;
             NextRound();
         }
     }
 
     public void NextWordRevealPlayer()
     {
-        _currentPlayerIndex++;
+        _currentPlayerIndex.Value++;
 
-        if (_currentPlayerIndex >= PlayerManager.instance.GetActivePlayers().Count)
+        if (_currentPlayerIndex.Value >= PlayerManager.instance.GetActivePlayers().Count)
         {
             StartCluePhase();
         }
@@ -266,8 +279,8 @@ public class RoundManager : NetworkBehaviour
 
     public void NextVoter()
     {
-        _currentPlayerIndex++;
-        onVoterChanged?.Invoke(_currentPlayerIndex);
+        _currentPlayerIndex.Value++;
+        onVoterChanged?.Invoke(_currentPlayerIndex.Value);
     }
 
     public void SetPhase(GamePhase phase)

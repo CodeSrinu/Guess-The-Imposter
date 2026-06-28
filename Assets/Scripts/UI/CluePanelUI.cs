@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,15 +17,25 @@ public class CluePanelUI : MonoBehaviour
 
 
 
-    public void SetPlayerName(string playerName)
+    public void SetUp(string currentPlayerName, int currentRound)
     {
-        _currentPlayerGivingClueTxtComp.text = playerName + "\'s Turn";
+        _currentPlayerGivingClueTxtComp.text = currentPlayerName + "\'s Turn";
+        _currentRoundTxtComp.text = "Round " + currentRound;
+
+
+        string myName = GameData.devicePlayerName;
+        if (GameData.isOnline)
+        {
+            _nextPlayerBtn.gameObject.SetActive(myName == currentPlayerName);
+        }
+        else
+        {
+            _nextPlayerBtn.gameObject.SetActive(true);
+        }
     }
 
-    public void SetCurrentRound(int currentRound)
-    {
-        _currentRoundTxtComp.text = "Round " + currentRound;
-    }
+
+
 
     public void OpenVotingTable()
     {

@@ -13,7 +13,7 @@ public class NetworkPlayerManager : NetworkBehaviour
 
     private Dictionary<string, ulong> _privateClientIds = new Dictionary<string, ulong>();
     private int _registeredClientsCount;
-
+    private int _confirmedClientCount = 0;
     public static NetworkPlayerManager instance;
 
     private void Awake()
@@ -113,10 +113,23 @@ public class NetworkPlayerManager : NetworkBehaviour
         }
         Debug.Log("SendPrivateDataToAll, player count: " + PlayerManager.instance.GetPlayers.Count);
         Debug.Log("Host data before phase: isImposter=" + isImposter + " word=" + assignedWord);
-        RoundManager.instance.StartWordRevealPhase();
-
-
     }
+
+
+    [ServerRpc(RequireOwnership = false)]
+    private void ConfirmReceivedWordServerRpc()
+    {
+        _confirmedClientCount++;
+        int totalClientsCount = GameData.playerNames.Count - 1;
+        if(_confirmedClientCount == totalClientsCount)
+        {
+            _confirmedClientCount = 0;
+            RoundManager.instance.StartWordRevealPhase();
+            Timer.instance.StartTimer(10f, RoundManager.instance.StartCluePhase);
+            StartTimerClientRpc();
+        }
+    }
+
 
     [ClientRpc]
     private void ReceivePrivateDataClientRpc(bool _isImposter, string _assignedWord, ClientRpcParams rpcParams)
@@ -124,6 +137,7 @@ public class NetworkPlayerManager : NetworkBehaviour
         isImposter = _isImposter;
         assignedWord = _assignedWord;
         UIManager.instance.SetUpWordRevealPanel();
+        ConfirmReceivedWordServerRpc();
     }
 
 

@@ -214,8 +214,7 @@ public class UIManager : MonoBehaviour
 
         CluePanelUI cluePanelScript = cluePanel.GetComponent<CluePanelUI>();
 
-        cluePanelScript.SetPlayerName(_currentPlayer.name);
-        cluePanelScript.SetCurrentRound(RoundManager.instance.CurrentRound);
+        cluePanelScript.SetUp(_currentPlayer.name, RoundManager.instance.CurrentRound);
     }
 
 
