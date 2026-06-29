@@ -11,6 +11,7 @@ public class NetworkPlayerManager : NetworkBehaviour
     public bool isImposter = false;
     public string assignedWord = "";
 
+
     private Dictionary<string, ulong> _privateClientIds = new Dictionary<string, ulong>();
     private int _registeredClientsCount;
     private int _confirmedClientCount = 0;
@@ -110,6 +111,7 @@ public class NetworkPlayerManager : NetworkBehaviour
         {
             isImposter = hostPlayer.isImposter;
             assignedWord = hostPlayer.assignedWord;
+            GameData.devicePlayerName = hostPlayer.name;
         }
         Debug.Log("SendPrivateDataToAll, player count: " + PlayerManager.instance.GetPlayers.Count);
         Debug.Log("Host data before phase: isImposter=" + isImposter + " word=" + assignedWord);

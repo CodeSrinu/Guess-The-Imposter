@@ -75,15 +75,13 @@ public class RoundManager : NetworkBehaviour
             }
         };
 
-        if (!IsHost)
-        {
-            onPhaseChanged?.Invoke(_currentPhase.Value);
-        }
     }
 
     private IEnumerator RegisterAfterSpawn()
     {
+        Debug.Log("RegisterAfterSpawn: waiting for NetworkPlayerManager");
         yield return new WaitUntil(() => NetworkPlayerManager.instance != null && NetworkPlayerManager.instance.IsSpawned);
+        Debug.Log("RegisterAfterSpawn: NetworkPlayerManager ready, registering as " + GameData.devicePlayerName);
         if (GameData.isOnline && !IsHost)
         {
             Lobby lobby = LobbyManager.instance.CurrentLobby;
@@ -254,10 +252,9 @@ public class RoundManager : NetworkBehaviour
 
     public void NextPlayerClue()
     {
-
+        Debug.Log("NextPlayerClue is called by host");
         _currentPlayerIndex.Value++;
-        // In NextPlayerClue
-        Debug.Log("NextPlayerClue: index=" + _currentPlayerIndex + " activeCount=" + PlayerManager.instance.GetActivePlayers().Count);
+        
 
 
         if (_currentPlayerIndex.Value >= PlayerManager.instance.GetActivePlayers().Count)
@@ -290,8 +287,8 @@ public class RoundManager : NetworkBehaviour
     }
 
 
-    [ClientRpc]
-    public void NextPlayerClueClientRpc()
+    [ServerRpc(RequireOwnership = false)]
+    public void NextPlayerClueServerRpc()
     {
         NextPlayerClue();
     }

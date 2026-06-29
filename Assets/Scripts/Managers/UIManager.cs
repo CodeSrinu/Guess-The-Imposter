@@ -46,13 +46,13 @@ public class UIManager : MonoBehaviour
         CluePanelUI cluePanelScript = cluePanel.GetComponent<CluePanelUI>();
         cluePanelScript.GetNextPlayerBtn.onClick.AddListener(() => {
 
-            if (!GameData.isOnline)
+            if (!GameData.isOnline || NetworkManager.Singleton.IsHost)
             {
                 RoundManager.instance.NextPlayerClue();
             }
             else
             {
-                RoundManager.instance.NextPlayerClueClientRpc();
+                RoundManager.instance.NextPlayerClueServerRpc();
             }
                 SetUpCluePanel();
         });
@@ -209,7 +209,6 @@ public class UIManager : MonoBehaviour
     {
         if (RoundManager.instance.CurrentPlayerIndex >= PlayerManager.instance.GetActivePlayers().Count) return;
 
-        if(NetworkManager.Singleton.IsHost) Debug.Log("host called SetupCluePanel");
         _currentPlayer = PlayerManager.instance.GetActivePlayers()[RoundManager.instance.CurrentPlayerIndex];
 
         CluePanelUI cluePanelScript = cluePanel.GetComponent<CluePanelUI>();
