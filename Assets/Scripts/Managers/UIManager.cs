@@ -219,6 +219,9 @@ public class UIManager : MonoBehaviour
             if (RoundManager.instance.CurrentPlayerIndex >= PlayerManager.instance.GetActivePlayers().Count) return;
 
             _currentPlayer = PlayerManager.instance.GetActivePlayers()[RoundManager.instance.CurrentPlayerIndex];
+        }
+        else
+        {
             votingPanelScript.SetWhosTurn(_currentPlayer.name);
         }
     }
