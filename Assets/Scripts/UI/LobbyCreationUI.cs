@@ -14,6 +14,9 @@ public class LobbyCreationUI : MonoBehaviour
     [SerializeField] private Slider imposterCountSlider;
     [SerializeField] private TMP_InputField votingDurationInputFeild;
     [SerializeField] private Toggle imposterWordToggle;
+    [SerializeField] private TextMeshProUGUI selectedCategoriesCountTxtComp;
+    [SerializeField] private Button chooseCategoriesBtn;
+    [SerializeField] private GameObject categoriesPanel;
 
 
     [SerializeField] private Transform playerNamesContainer;
@@ -23,6 +26,8 @@ public class LobbyCreationUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI roundsSliderTxt;
     [SerializeField] private TextMeshProUGUI playerCountSliderTxt;
     [SerializeField] private TextMeshProUGUI imposterCountSliderTxt;
+
+    public int maxDurationForVoting = 120;
 
 
     private  int roundsCount = 2;
@@ -55,6 +60,7 @@ public class LobbyCreationUI : MonoBehaviour
             }
             SetThePlayerNamesTemplate();
         }
+        categoriesPanel.GetComponent<CategoryPanelUI>().PopulateCategories();
 
         playerCountSlider.onValueChanged.AddListener((value) =>
         {
@@ -96,10 +102,22 @@ public class LobbyCreationUI : MonoBehaviour
         {
             int parsedValue = int.Parse(value);
             votingDuration = Mathf.RoundToInt(parsedValue);
-            if (votingDuration > 60)
-                votingDuration = 60;
+            if (votingDuration > maxDurationForVoting)
+                votingDuration = maxDurationForVoting;
         });
 
+        chooseCategoriesBtn.onClick.AddListener(() =>
+        {
+            OpenCategoriesPanel();
+        });
+
+        CategoryPanelUI categoriesPanelScript = categoriesPanel.GetComponent<CategoryPanelUI>();
+
+        categoriesPanelScript.BackBtn.onClick.AddListener(() =>
+        {
+            UpdateCategoriesCountTxt(categoriesPanelScript.GetTheCountOfCategoriesSelected().ToString());
+            CloseCategoriesPanel();
+        });
 
         startGameBtn.onClick.AddListener(() =>
         {
@@ -113,6 +131,7 @@ public class LobbyCreationUI : MonoBehaviour
             {
                 SaveDataToGameDataClass();
                 SavePlayerNamesTemplate();
+                SaveCategoriesTemplate();
                 SceneManager.LoadScene("Game");
 
             }
@@ -124,8 +143,11 @@ public class LobbyCreationUI : MonoBehaviour
         imposterCountSliderTxt.text = imposterCount.ToString();
         playerCountSliderTxt.text = playersCount.ToString();
         roundsSliderTxt.text = roundsCount.ToString();
+        string categoriesString = PlayerPrefs.GetString("CategoriesTemplate", "");
+        List<string> categories = categoriesString.Split(",").ToList();
+        selectedCategoriesCountTxtComp.text = categories.Count.ToString();
 
-
+        categoriesPanel.SetActive(false);
     }
 
     public void AdjustInputFeildCount(int targetCount)
@@ -152,6 +174,20 @@ public class LobbyCreationUI : MonoBehaviour
             var prefab = Instantiate(playerNameInputFiledPrefab);
             prefab.transform.SetParent(playerNamesContainer, false);
         }
+    }
+
+    public void OpenCategoriesPanel()
+    {
+        categoriesPanel.SetActive(true);
+    }
+
+    public void CloseCategoriesPanel()
+    {
+        categoriesPanel.SetActive(false);
+    }
+    public void UpdateCategoriesCountTxt(string count)
+    {
+        selectedCategoriesCountTxtComp.text = count;
     }
 
 
@@ -204,5 +240,19 @@ public class LobbyCreationUI : MonoBehaviour
                 return;
             }
         }
+    }
+
+    public void SaveCategoriesTemplate()
+    {
+        string categoriesString = string.Join(",", WordManager.instance.SelecetedCategories);
+        PlayerPrefs.SetString("CategoriesTemplate", categoriesString);
+        PlayerPrefs.Save();
+    }
+
+    public void SetCategoriesTemplate()
+    {
+        string categoriesString = PlayerPrefs.GetString("CategoriesTemplate", "");
+        List<string> categories = categoriesString.Split(",").ToList();
+        categoriesPanel.GetComponent<CategoryPanelUI>().allCategories = categories;
     }
 }

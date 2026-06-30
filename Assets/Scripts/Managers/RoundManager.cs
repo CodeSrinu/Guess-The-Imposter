@@ -108,6 +108,8 @@ public class RoundManager : NetworkBehaviour
     {
         if(!IsHost && GameData.isOnline) return;
 
+        NetworkPlayerManager.instance.ResetRegistrationState();
+
         Debug.Log("StartGame called, playerNames count: " + GameData.playerNames.Count);
 
         _currentRound.Value = 1;

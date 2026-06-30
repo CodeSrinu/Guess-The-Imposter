@@ -142,6 +142,14 @@ public class NetworkPlayerManager : NetworkBehaviour
         ConfirmReceivedWordServerRpc();
     }
 
+    public void ResetRegistrationState()
+    {
+        _privateClientIds.Clear();
+        _registeredClientsCount = 0;
+        _confirmedClientCount = 0;
+        Players.Clear();
+    }
 
-    
+
+
 }
