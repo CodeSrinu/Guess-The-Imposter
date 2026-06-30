@@ -142,7 +142,7 @@ public class RoundManager : NetworkBehaviour
 
         if (GameData.isOnline)
         {
-            NetworkPlayerManager.instance.StartTimerClientRpc();
+            NetworkPlayerManager.instance.StartTimerClientRpc(10f);
         }
     }
 
@@ -168,7 +168,10 @@ public class RoundManager : NetworkBehaviour
         VotingManager.instance.Initialize();
 
         if (GameData.isOnline)
+        {
             Timer.instance.StartTimer(GameData.votingDuration, VotingManager.instance.TallyVotes);
+            NetworkPlayerManager.instance.StartTimerClientRpc(GameData.votingDuration);
+        }
     }
 
     public void EndGame(GameResult result)

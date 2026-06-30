@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -10,6 +11,7 @@ public class VotingManager : NetworkBehaviour
 {
     private Dictionary<Player, int> _votes = new Dictionary<Player, int>();
     private int _votesCount = 0;
+    private int _skipVoteCount = 0;
 
     public event Action<Player> onPlayerEliminated;
 
@@ -58,25 +60,18 @@ public class VotingManager : NetworkBehaviour
     }
 
     [ServerRpc(RequireOwnership = false)]
-    public void CastVoteServerRpc(string playerName)
+    public void CastVoteServerRpc(string votedForPlayerName, string voterName)
     {
-        Player player = new Player();
-        foreach(Player p in PlayerManager.instance.GetPlayers)
-        {
-            if(p.name == playerName)
-            {
-                player = p;
-                break;
-            }
-        }
+        Player voter = PlayerManager.instance.GetActivePlayers().Find(p =>  p.name == voterName);
+        if (voter.hasVoted) return;
 
-        if (player.hasVoted) return;
+        voter.hasVoted = true;
 
+        Player votedFor = PlayerManager.instance.GetActivePlayers().Find(p => p.name == votedForPlayerName);
 
-        _votes[player] += 1;
-        player.hasVoted = true;
+        _votes[votedFor] += 1;
 
-        UpdateVoteCountClientRpc(playerName, _votes[player]);
+        UpdateVoteCountClientRpc(votedForPlayerName, _votes[votedFor]);
         _votesCount++;
 
         if (_votesCount >= _votes.Count)
@@ -102,12 +97,25 @@ public class VotingManager : NetworkBehaviour
         }
     }
 
+    [ClientRpc]
+    public void UpdateSkipVoteCountClientRpc(int voteCount)
+    {
+        VotingPanelUI votingPanelUIScript = FindAnyObjectByType<VotingPanelUI>();
+        votingPanelUIScript.GetSkipBtn.GetComponentInChildren<TextMeshProUGUI>().text = voteCount.ToString();
+    }
+
     public void ResetVotes()
     {
         if (!IsHost && GameData.isOnline) return;
         _votes.Clear();
         _votesCount = 0;
+        _skipVoteCount = 0;
         Initialize();
+
+        foreach(Player p in PlayerManager.instance.GetActivePlayers())
+        {
+            p.hasVoted = false;
+        }
     }
 
 
@@ -116,6 +124,7 @@ public class VotingManager : NetworkBehaviour
     public void TallyVotes()
     {
         if (!IsHost && GameData.isOnline) return;
+        Timer.instance.StopTimer();
 
         Player highestVotedPlayer = new Player();
 
@@ -194,29 +203,25 @@ public class VotingManager : NetworkBehaviour
 
 
     [ServerRpc(RequireOwnership = false)]
-    public void SkipVoteServerRpc(string playerName)
+    public void SkipVoteServerRpc(string voterName)
     {
 
-        Player player = new Player();
-        foreach (Player p in PlayerManager.instance.GetPlayers)
-        {
-            if (p.name == playerName)
-            {
-                player = p;
-                break;
-            }
-        }
+        Player voter = PlayerManager.instance.GetActivePlayers().Find(p => p.name == voterName);
 
-        if (player.hasVoted) return;
+        if (voter.hasVoted) return;
+        voter.hasVoted = true;
 
         _votesCount++;
-        player.hasVoted = true;
+        _skipVoteCount++;
+
+        UpdateSkipVoteCountClientRpc(_skipVoteCount);
 
 
         if (_votesCount >= _votes.Count)
         {
             TallyVotes();
         }
+
     }
     [ClientRpc]
     public void BroadCastEliminationClientRpc(string playerName)

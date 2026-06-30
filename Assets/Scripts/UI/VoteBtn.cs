@@ -16,15 +16,15 @@ public class VoteBtn : MonoBehaviour
         {
             if (GameData.isOnline)
             {
-                VotingManager.instance.CastVoteServerRpc(_player.name);
+                VotingManager.instance.CastVoteServerRpc(_player.name, GameData.devicePlayerName);
             }
             else
             {
                 int count = VotingManager.instance.CastVote(_player);
                 UpdateVoteCount(count);
+                RoundManager.instance.NextVoter();
             }
 
-            RoundManager.instance.NextVoter();
 
         });
     }

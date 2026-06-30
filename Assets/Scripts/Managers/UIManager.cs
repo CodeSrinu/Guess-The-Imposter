@@ -62,18 +62,9 @@ public class UIManager : MonoBehaviour
 
         VotingPanelUI votingPanelScript = votingPanel.GetComponent<VotingPanelUI>();
         Button btn = votingPanelScript.GetSkipBtn;
-        TextMeshProUGUI btnVoteCountTxtComp = btn.GetComponentInChildren<TextMeshProUGUI>();
         btn.onClick.AddListener(() =>
         {
-            int voteCount;
-            if (!int.TryParse(btnVoteCountTxtComp.text, out voteCount))
-            {
-                voteCount = 0;
-            }
-            voteCount++;
-            btnVoteCountTxtComp.text = voteCount.ToString();
             Invoke("VoteBasedOnIsOnline", 1f);
-            
         });
         
 
@@ -110,7 +101,7 @@ public class UIManager : MonoBehaviour
         Button btn = votingPanelScript.GetSkipBtn;
         TextMeshProUGUI btnVoteCountTxtComp = btn.GetComponentInChildren<TextMeshProUGUI>();
         btnVoteCountTxtComp.text = "0";
-        Invoke("DisableVotingResultPanel", 3f);
+        Invoke("DisableVotingResultPanel", 5f);
     }
 
     public void HandlePhaseChanged(RoundManager.GamePhase phase)
@@ -219,14 +210,17 @@ public class UIManager : MonoBehaviour
 
     public void SetUpVotingPanel()
     {
-        if (RoundManager.instance.CurrentPlayerIndex >= PlayerManager.instance.GetActivePlayers().Count) return;
-
-        _currentPlayer = PlayerManager.instance.GetActivePlayers()[RoundManager.instance.CurrentPlayerIndex];
         VotingPanelUI votingPanelScript = votingPanel.GetComponent<VotingPanelUI>();
-
         votingPanelScript.DestroyAllVotingBtns();
         votingPanelScript.InstantiateVotingBtns(PlayerManager.instance.GetActivePlayers());
-        votingPanelScript.SetWhosTurn(_currentPlayer.name);
+
+        if (GameData.isOnline)
+        {
+            if (RoundManager.instance.CurrentPlayerIndex >= PlayerManager.instance.GetActivePlayers().Count) return;
+
+            _currentPlayer = PlayerManager.instance.GetActivePlayers()[RoundManager.instance.CurrentPlayerIndex];
+            votingPanelScript.SetWhosTurn(_currentPlayer.name);
+        }
     }
 
 
@@ -243,13 +237,15 @@ public class UIManager : MonoBehaviour
 
     public void VoteBasedOnIsOnline()
     {
+        Player player = PlayerManager.instance.GetActivePlayers()[RoundManager.instance.CurrentPlayerIndex];
+
         if (GameData.isOnline)
         {
-            VotingManager.instance.SkipVoteServerRpc(_currentPlayer.name);
+            VotingManager.instance.SkipVoteServerRpc(GameData.devicePlayerName);
         }
         else
         {
-            VotingManager.instance.SkipVote(_currentPlayer);
+            VotingManager.instance.SkipVote(player);
         }
     }
 }

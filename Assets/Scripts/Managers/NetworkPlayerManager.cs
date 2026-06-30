@@ -80,10 +80,10 @@ public class NetworkPlayerManager : NetworkBehaviour
     }
 
     [ClientRpc]
-    public void StartTimerClientRpc()
+    public void StartTimerClientRpc(float duration)
     {
         if (IsHost) return;
-        Timer.instance.StartTimer(10f, null);
+        Timer.instance.StartTimer(duration, null);
     }
 
     private void SendPrivateDataToAll()
@@ -128,7 +128,7 @@ public class NetworkPlayerManager : NetworkBehaviour
             _confirmedClientCount = 0;
             RoundManager.instance.StartWordRevealPhase();
             Timer.instance.StartTimer(10f, RoundManager.instance.StartCluePhase);
-            StartTimerClientRpc();
+            StartTimerClientRpc(10f);
         }
     }
 

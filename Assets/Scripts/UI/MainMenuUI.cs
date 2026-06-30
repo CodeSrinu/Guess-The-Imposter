@@ -1,13 +1,14 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 using System.Threading.Tasks;
-using Unity.Services.Core;
-using Unity.Services.Authentication;
-using System;
 using TMPro;
+using Unity.Netcode;
+using Unity.Services.Authentication;
+using Unity.Services.Core;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class MainMenuUI : MonoBehaviour
 {
@@ -31,6 +32,15 @@ public class MainMenuUI : MonoBehaviour
 
     private void Awake()
     {
+        if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening)
+        {
+            NetworkManager.Singleton.Shutdown();
+        }
+        if(LobbyManager.instance != null)
+        {
+            LobbyManager.instance.StopPolling();
+        }
+
         createGameBtn.onClick.AddListener(() =>
         {
             onlineStatusPanel.SetActive(true);
