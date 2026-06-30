@@ -30,7 +30,7 @@ public class LobbyUI : MonoBehaviour
     {
         startBtn.onClick.AddListener(() =>
         {
-            if (LobbyManager.instance.CurrentLobby.Players.Count >= 2)
+            if (LobbyManager.instance.CurrentLobby.Players.Count >= 3)
             {
                 NetworkManager.Singleton.SceneManager.LoadScene("Game", LoadSceneMode.Single);
             }

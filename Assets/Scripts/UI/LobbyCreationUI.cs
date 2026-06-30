@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
@@ -39,7 +40,20 @@ public class LobbyCreationUI : MonoBehaviour
         }
         else
         {
-            InstantiateInputFields(playersCount);
+            string namesString = PlayerPrefs.GetString("PlayerNamesTemplate", "");
+            List<string> prevPlayerNames = namesString.Split(",").ToList();
+            if(prevPlayerNames.Count > 0)
+            {
+                InstantiateInputFields(prevPlayerNames.Count);
+                playerCountSlider.value = prevPlayerNames.Count;
+                playerCountSliderTxt.text = prevPlayerNames.Count.ToString();
+                playersCount = prevPlayerNames.Count;
+            }
+            else
+            {
+                InstantiateInputFields(playersCount);
+            }
+            SetThePlayerNamesTemplate();
         }
 
         playerCountSlider.onValueChanged.AddListener((value) =>
@@ -51,8 +65,8 @@ public class LobbyCreationUI : MonoBehaviour
 
             if (!LobbyManager.instance.IsOnline)
             {
-                DestryAllInputFields();
-                InstantiateInputFields(playersCount);
+                AdjustInputFeildCount(intValue);
+                SetThePlayerNamesTemplate();
             }
 
 
@@ -98,6 +112,7 @@ public class LobbyCreationUI : MonoBehaviour
             else
             {
                 SaveDataToGameDataClass();
+                SavePlayerNamesTemplate();
                 SceneManager.LoadScene("Game");
 
             }
@@ -113,6 +128,23 @@ public class LobbyCreationUI : MonoBehaviour
 
     }
 
+    public void AdjustInputFeildCount(int targetCount)
+    {
+        int currentCount = playerNamesContainer.childCount;
+
+        if(targetCount > currentCount)
+        {
+            InstantiateInputFields(targetCount - currentCount);
+        }
+        else if(targetCount < currentCount) 
+        {
+            for(int i = currentCount - 1;i >= targetCount; i--)
+            {
+                Destroy(playerNamesContainer.GetChild(i).gameObject);
+            }
+        }
+    }
+
     public void InstantiateInputFields(int count)
     {
         for(int i = 0; i < count; i++)
@@ -122,15 +154,6 @@ public class LobbyCreationUI : MonoBehaviour
         }
     }
 
-    public void DestryAllInputFields()
-    {
-        if (playerNamesContainer.childCount <= 0) return;
-
-        foreach (Transform child in playerNamesContainer)
-        {
-            Destroy(child.gameObject);
-        }
-    }
 
     public void SaveDataToGameDataClass()
     {
@@ -147,11 +170,39 @@ public class LobbyCreationUI : MonoBehaviour
         GameData.isOnline = LobbyManager.instance.IsOnline;
     }
 
+
     private async Task StartOnlineGameFlow()
     {
         SaveDataToGameDataClass();
         string hostName = playerNamesContainer.GetChild(0).GetComponentInChildren<TextMeshProUGUI>().text;
         await LobbyManager.instance.StartOnlineGame(hostName);
         SceneManager.LoadScene("Lobby");
+    }
+
+
+    public void SavePlayerNamesTemplate()
+    {
+        string playerNamesString = string.Join(",", GameData.playerNames);
+        PlayerPrefs.SetString("PlayerNamesTemplate", playerNamesString);
+        PlayerPrefs.Save();
+    }
+
+    public void SetThePlayerNamesTemplate()
+    {
+        string namesString = PlayerPrefs.GetString("PlayerNamesTemplate", "");
+        List<string> playerNames = namesString.Split(",").ToList();
+        int i = 0;
+        foreach (Transform child in playerNamesContainer)
+        {
+            if (playerNames.ElementAtOrDefault<string>(i) != null)
+            {
+                child.GetComponentInChildren<TMP_InputField>().text = playerNames[i];
+                i++;
+            }
+            else
+            {
+                return;
+            }
+        }
     }
 }
