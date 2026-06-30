@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -13,6 +14,16 @@ public class ResultPanelUI : MonoBehaviour
         winTextComp.text = result is RoundManager.GameResult.ImpostersWon ? "Imposters Won" : "Civilians Won";
 
         yield return new WaitForSeconds(2f);
-        SceneManager.LoadScene("LobbyCreation");
+        if (GameData.isOnline)
+        {
+            if (NetworkManager.Singleton.IsHost)
+            {
+                NetworkManager.Singleton.SceneManager.LoadScene("Lobby", LoadSceneMode.Single);
+            }
+        }
+        else
+        {
+            SceneManager.LoadScene("LobbyCreation");
+        }
     }
 }
