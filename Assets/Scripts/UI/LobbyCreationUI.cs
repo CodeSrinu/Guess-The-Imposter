@@ -145,7 +145,7 @@ public class LobbyCreationUI : MonoBehaviour
         roundsSliderTxt.text = roundsCount.ToString();
         string categoriesString = PlayerPrefs.GetString("CategoriesTemplate", "");
         List<string> categories = categoriesString.Split(",").ToList();
-        selectedCategoriesCountTxtComp.text = categories.Count.ToString();
+        selectedCategoriesCountTxtComp.text = categories.Count >= 25 ? categories.Count.ToString(): "25";
 
         categoriesPanel.SetActive(false);
     }

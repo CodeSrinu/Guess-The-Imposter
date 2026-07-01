@@ -31,9 +31,12 @@ public class CategoryBtn : MonoBehaviour, IPointerDownHandler
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        isSelected = !isSelected;
+        if (gameObject.GetComponentInParent<CategoryPanelUI>().GetTheCountOfCategoriesSelected() > 1 || !isSelected)
+        {
+            isSelected = !isSelected;
+        }
 
-        if(isSelected)
+        if (isSelected)
         {
             transform.localScale = selectedScale;
             WordManager.instance.AddCategory(categoryName);
@@ -46,6 +49,6 @@ public class CategoryBtn : MonoBehaviour, IPointerDownHandler
             gameObject.GetComponentInChildren<Image>().color = Color.red;
 
         }
-
+ 
     }
 }
