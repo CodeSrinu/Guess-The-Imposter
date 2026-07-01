@@ -2002,6 +2002,7 @@ GameObject:
   - component: {fileID: 659635110}
   - component: {fileID: 659635109}
   - component: {fileID: 659635108}
+  - component: {fileID: 659635112}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -2025,7 +2026,7 @@ MonoBehaviour:
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 55
 --- !u!114 &659635109
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2070,7 +2071,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 100
   m_TargetDisplay: 0
 --- !u!224 &659635111
 RectTransform:
@@ -2092,6 +2093,21 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &659635112
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 659635107}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87cac407772897b4db6b25781c59d085, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  loadingPrefab: {fileID: 8232208560040423610, guid: 01141e27bccf885498805d724b4c77bc, type: 3}
+  errorLoadingPrefab: {fileID: 412432772307778470, guid: 8282c953dd3228e4b803442ceb712011, type: 3}
+  errorPanelCloseBtn: {fileID: 0}
 --- !u!1 &665357834
 GameObject:
   m_ObjectHideFlags: 0
@@ -3057,6 +3073,32 @@ MonoBehaviour:
   categoryBtnsContainer: {fileID: 1150104381}
   categoryBtnPrefab: {fileID: 1608954882280221206, guid: 59578ad160e53e142946cdc426ebeb32, type: 3}
   backBtn: {fileID: 856011748}
+  allCategories:
+  - TOLLYWOOD
+  - TOLLYWOOD CELEBRITIES
+  - TELUGU MOVIE CHARACTERS
+  - ANDHRA/TELANGANA FOOD
+  - ANDHRA/TELANGANA PLACES
+  - TELUGU STATES CULTURE & DAILY LIFE
+  - TELUGU RELATIONS & SLANG
+  - SOUTH INDIAN CINEMA
+  - SOUTH INDIAN CELEBRITIES
+  - BOLLYWOOD
+  - BOLLYWOOD CELEBRITIES
+  - HOLLYWOOD
+  - FOREIGN CELEBRITIES
+  - WEB SERIES & OTT
+  - ANIME
+  - CRICKET
+  - SPORTS GENERAL
+  - INDIAN FOOD GENERAL
+  - TECHNOLOGY & GADGETS
+  - INDIAN MUSIC
+  - WESTERN MUSIC
+  - ANIMALS & NATURE
+  - PROFESSIONS
+  - PLACES IN INDIA
+  - FESTIVALS INDIA
 --- !u!1 &1150104380
 GameObject:
   m_ObjectHideFlags: 0

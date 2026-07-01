@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class PlayerManager : MonoBehaviour
@@ -23,11 +24,28 @@ public class PlayerManager : MonoBehaviour
 
     public List<Player> GetActivePlayers()
     {
-        var list = new List<Player>();
-        foreach (Player player in PlayerManager.instance.GetPlayers)
+        if (!GameData.isOnline)
         {
-            if (!player.isEliminated)
+            return _players.Where(p => !p.isEliminated).ToList();
+        }
+
+        var list = new List<Player>();
+        foreach (Player player in _players)
+        {
+            PlayerNetworkData? netData = null;
+            foreach (var p in NetworkPlayerManager.instance.Players)
+            {
+                if (p.name.ToString() == player.name)
+                {
+                    netData = p;
+                    break;
+                }
+            }
+
+            if (!netData.Value.isEliminated)
+            {
                 list.Add(player);
+            }
         }
 
         return list;

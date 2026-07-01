@@ -63,7 +63,10 @@ public class VotingManager : NetworkBehaviour
     public void CastVoteServerRpc(string votedForPlayerName, string voterName)
     {
         Player voter = PlayerManager.instance.GetActivePlayers().Find(p =>  p.name == voterName);
+
+        if (voter == null) return;
         if (voter.hasVoted) return;
+
 
         voter.hasVoted = true;
 
@@ -125,6 +128,7 @@ public class VotingManager : NetworkBehaviour
     {
         if (!IsHost && GameData.isOnline) return;
         Timer.instance.StopTimer();
+        NetworkPlayerManager.instance.StopTimerClientRpc();
 
         Player highestVotedPlayer = new Player();
 
@@ -138,6 +142,16 @@ public class VotingManager : NetworkBehaviour
             {
                 highestVotedPlayer = player;
                 highestVotedPlayersList.Add(player);
+            }
+        }
+
+        for(int i = 0; i < NetworkPlayerManager.instance.Players.Count; i++)
+        {
+            if(NetworkPlayerManager.instance.Players[i].name == highestVotedPlayer.name)
+            {
+                var playerData = NetworkPlayerManager.instance.Players[i];
+                playerData.isEliminated = true;
+                NetworkPlayerManager.instance.Players[i] = playerData;
             }
         }
 
@@ -208,6 +222,7 @@ public class VotingManager : NetworkBehaviour
 
         Player voter = PlayerManager.instance.GetActivePlayers().Find(p => p.name == voterName);
 
+        if (voter == null) return;
         if (voter.hasVoted) return;
         voter.hasVoted = true;
 
@@ -229,21 +244,18 @@ public class VotingManager : NetworkBehaviour
         if(playerName == "")
         {
             onPlayerEliminated?.Invoke(null);
+            return;
         }
 
-        Player player = new Player();
-        foreach (Player p in PlayerManager.instance.GetPlayers)
-        {
-            if (p.name == playerName)
-            {
-                player = p;
-                break;
-            }
-        }
+        Player player = PlayerManager.instance.GetPlayers.Find(p => p.name == playerName);  
 
-        if (player.isEliminated)
+        if (player == null)
         {
-            onPlayerEliminated?.Invoke(player);
+            Debug.LogError($"[ELIMINATION SYNC FAILED] Could not find '{playerName}' in local roster: " +
+            string.Join(", ", PlayerManager.instance.GetPlayers.Select(p => p.name)));
+            return;
         }
+        player.isEliminated = true;
+        onPlayerEliminated?.Invoke(player);
     }
 }

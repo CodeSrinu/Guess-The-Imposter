@@ -57,7 +57,7 @@ public class UIManager : MonoBehaviour
                 SetUpCluePanel();
         });
         cluePanelScript.GetVotingTableBtn.onClick.AddListener(() => {
-            cluePanelScript.OpenVotingTable();
+        cluePanelScript.OpenVotingTable();
         });
 
         VotingPanelUI votingPanelScript = votingPanel.GetComponent<VotingPanelUI>();
@@ -67,8 +67,6 @@ public class UIManager : MonoBehaviour
             Invoke("VoteBasedOnIsOnline", 1f);
         });
         
-
-
 
         RoundManager.instance.onPhaseChanged += HandlePhaseChanged;
         RoundManager.instance.onVoterChanged += HandleVoterChanged;
@@ -214,11 +212,21 @@ public class UIManager : MonoBehaviour
         votingPanelScript.DestroyAllVotingBtns();
         votingPanelScript.InstantiateVotingBtns(PlayerManager.instance.GetActivePlayers());
 
+        bool isLocalPlayerEliminated = GameData.isOnline ? NetworkPlayerManager.instance.IsPlayerEliminated(GameData.devicePlayerName) : false;
+
+        votingPanelScript.SetInteractable(!isLocalPlayerEliminated);
+
+        if (isLocalPlayerEliminated)
+        {
+            votingPanelScript.SetSpectatorMode();
+        }
+
         if (GameData.isOnline)
         {
             if (RoundManager.instance.CurrentPlayerIndex >= PlayerManager.instance.GetActivePlayers().Count) return;
 
             _currentPlayer = PlayerManager.instance.GetActivePlayers()[RoundManager.instance.CurrentPlayerIndex];
+            votingPanelScript.SetWhosTurn("");
         }
         else
         {

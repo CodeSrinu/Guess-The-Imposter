@@ -86,6 +86,13 @@ public class NetworkPlayerManager : NetworkBehaviour
         Timer.instance.StartTimer(duration, null);
     }
 
+    [ClientRpc]
+    public void StopTimerClientRpc()
+    {
+        if (IsHost) return;
+        Timer.instance.StopTimer();
+    }
+
     private void SendPrivateDataToAll()
     {
         
@@ -112,6 +119,7 @@ public class NetworkPlayerManager : NetworkBehaviour
             isImposter = hostPlayer.isImposter;
             assignedWord = hostPlayer.assignedWord;
             GameData.devicePlayerName = hostPlayer.name;
+            LoadingScreenUI.instance.StopLoading();
         }
         Debug.Log("SendPrivateDataToAll, player count: " + PlayerManager.instance.GetPlayers.Count);
         Debug.Log("Host data before phase: isImposter=" + isImposter + " word=" + assignedWord);
@@ -138,6 +146,7 @@ public class NetworkPlayerManager : NetworkBehaviour
     {
         isImposter = _isImposter;
         assignedWord = _assignedWord;
+        LoadingScreenUI.instance.StopLoading();
         UIManager.instance.SetUpWordRevealPanel();
         ConfirmReceivedWordServerRpc();
     }
@@ -150,6 +159,13 @@ public class NetworkPlayerManager : NetworkBehaviour
         Players.Clear();
     }
 
-
+    public bool IsPlayerEliminated(string playerName)
+    {
+        foreach(PlayerNetworkData player in Players)
+        {
+            if (player.name.ToString() == playerName) return player.isEliminated;
+        }
+        return false;
+    }
 
 }

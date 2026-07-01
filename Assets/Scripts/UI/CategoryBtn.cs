@@ -12,21 +12,7 @@ public class CategoryBtn : MonoBehaviour, IPointerDownHandler
 
     private void Start()
     {
-        originalScale = transform.localScale;
-
-        if (isSelected)
-        {
-            transform.localScale = selectedScale;
-            WordManager.instance.AddCategory(categoryName);
-            gameObject.GetComponentInChildren<Image>().color = Color.green;
-        }
-        else
-        {
-            transform.localScale = originalScale;
-            WordManager.instance.RemoveCategory(categoryName);
-            gameObject.GetComponentInChildren<Image>().color = Color.red;
-
-        }
+        originalScale = Vector3.one;
     }
 
     public void OnPointerDown(PointerEventData eventData)
@@ -36,7 +22,13 @@ public class CategoryBtn : MonoBehaviour, IPointerDownHandler
             isSelected = !isSelected;
         }
 
-        if (isSelected)
+        ChangeTheBtnStatus(isSelected);
+ 
+    }
+
+    public void ChangeTheBtnStatus(bool _isSelected)
+    {
+        if (_isSelected)
         {
             transform.localScale = selectedScale;
             WordManager.instance.AddCategory(categoryName);
@@ -49,6 +41,5 @@ public class CategoryBtn : MonoBehaviour, IPointerDownHandler
             gameObject.GetComponentInChildren<Image>().color = Color.red;
 
         }
- 
     }
 }

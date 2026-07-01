@@ -1,4 +1,3 @@
-using Unity.Services.Core;
 using Unity.Services.Authentication;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
@@ -11,7 +10,6 @@ using System.Threading.Tasks;
 using Unity.Networking.Transport.Relay;
 using System;
 using System.Collections.Generic;
-using UnityEngine.SceneManagement;
 
 public class LobbyManager : MonoBehaviour
 {
@@ -41,8 +39,9 @@ public class LobbyManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    public async Task<string> CreateRelay()
+    public async Task<(string, string)> CreateRelay()
     {
+        string errorMsg = "";
         try
         {
             Allocation allocation = await RelayService.Instance.CreateAllocationAsync(GameData.playersCount);
@@ -53,17 +52,43 @@ public class LobbyManager : MonoBehaviour
             RelayServerData relayServerData = new RelayServerData(allocation, "dtls");
             unityTransport.SetRelayServerData(relayServerData);
 
-            return joinCode;
+            errorMsg = "";
+            return (joinCode, errorMsg);
         }
-        catch(Exception e)
+        catch(RelayServiceException e)
         {
             Debug.LogError("Relay Creation Failed: " + e.Message);
-            return null;
+
+            switch (e.Reason)
+            {
+                case RelayExceptionReason.RateLimited:
+                    errorMsg = "Too many Attempts. Please wait a moment and try again.";
+                    break;
+                case RelayExceptionReason.Forbidden:
+                    errorMsg = "You don't have permission to do that right now.";
+                    break;
+                case RelayExceptionReason.EntityNotFound:
+                    errorMsg = "The game session doesn't exist anymore.";
+                    break;
+                case RelayExceptionReason.NetworkError:
+                    errorMsg = "Connection problem. Check your connection and try again.";
+                    break;
+                case RelayExceptionReason.Unknown:
+                    errorMsg = "Something went wrong, Please try again.";
+                    break;
+                default:
+                    errorMsg = "Something went wrong, Please try again.";
+                    break;
+            }
+
+
+            return (null, errorMsg);
         }
     }
 
-    public async Task CreateLobby(string relayJoinCode, string hostName)
+    public async Task<string> CreateLobby(string relayJoinCode, string hostName)
     {
+
         _playerName = hostName;
         try
         {
@@ -95,10 +120,37 @@ public class LobbyManager : MonoBehaviour
             _currentLobby = await LobbyService.Instance.CreateLobbyAsync(hostName, GameData.playersCount, lobbyOptions);
 
             StartHeartBeat();
+            
+            return null;
         }
-        catch(Exception e)
+        catch(LobbyServiceException e)
         {
             Debug.LogError("Lobby Creation Failed: " + e.Message);
+            string errorMsg = "";
+
+            switch (e.Reason)
+            {
+                case LobbyExceptionReason.RateLimited:
+                    errorMsg = "Too many Attempts. Please wait a moment and try again.";
+                    break;
+                case LobbyExceptionReason.LobbyNotFound:
+                    errorMsg = "That room doesn't exist. Check the code and try again.";
+                    break;
+                case LobbyExceptionReason.LobbyFull:
+                    errorMsg = "That room is already full.";
+                    break;
+                case LobbyExceptionReason.LobbyAlreadyExists:
+                    errorMsg = "A room with that code already exists.";
+                    break;
+                case LobbyExceptionReason.Forbidden:
+                    errorMsg = "You don't have permission to do that right now.";
+                    break;
+                default:
+                    errorMsg = "Something went wrong, Please try again.";
+                    break;
+            }
+
+            return errorMsg;
         }
     }
 
@@ -183,12 +235,25 @@ public class LobbyManager : MonoBehaviour
         }
     }
 
-    public async Task StartOnlineGame(string hostName)
+    public async Task<bool> StartOnlineGame(string hostName)
     {
-        string relayJoinCode = await CreateRelay();
-        if (relayJoinCode == null) return;
-        await CreateLobby(relayJoinCode, hostName);
+        var (code, error) = await CreateRelay();
+        string relayJoinCode = code;
+        string relayErrorMsg = error;
+        if (relayJoinCode == null)
+        {
+            LoadingScreenUI.instance.ShowLoadingError(relayErrorMsg);
+            return false;
+        }
+        string lobbyErrorMsg = await CreateLobby(relayJoinCode, hostName);
+        if(lobbyErrorMsg != null)
+        {
+            LoadingScreenUI.instance.ShowLoadingError(lobbyErrorMsg);
+            return false;
+        }
+
         NetworkManager.Singleton.StartHost();
+        return true;
     }
 
     public async Task PollLobby()

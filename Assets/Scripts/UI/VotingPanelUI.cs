@@ -9,9 +9,15 @@ public class VotingPanelUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI voterNameTextComp;
     [SerializeField] private GameObject _votingBtnPrefab;
     [SerializeField] private Button _skipVoteBtn;
+    private CanvasGroup _canvasGroup;
 
     public Button GetSkipBtn => _skipVoteBtn;
     public Transform GetVotingGridContainer => _votingGridContainer;
+
+    private void Start()
+    {
+        _canvasGroup = GetComponent<CanvasGroup>();
+    }
 
     public void DestroyAllVotingBtns()
     {
@@ -19,6 +25,12 @@ public class VotingPanelUI : MonoBehaviour
         {
             Destroy(child.gameObject);
         }
+    }
+
+    public void SetInteractable(bool interactable)
+    {
+        _canvasGroup.interactable = interactable;
+        _canvasGroup.blocksRaycasts = interactable;
     }
 
     public void InstantiateVotingBtns(List<Player> players)
@@ -34,5 +46,8 @@ public class VotingPanelUI : MonoBehaviour
     {
         voterNameTextComp.text = name + "\' turn to vote";
     }
-
+    public void SetSpectatorMode()
+    {
+        voterNameTextComp.text = "Spectating...";
+    }
 }

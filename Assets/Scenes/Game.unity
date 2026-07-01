@@ -1684,6 +1684,7 @@ GameObject:
   - component: {fileID: 545304245}
   - component: {fileID: 545304244}
   - component: {fileID: 545304246}
+  - component: {fileID: 545304247}
   m_Layer: 5
   m_Name: Voting Panel
   m_TagString: Untagged
@@ -1767,6 +1768,18 @@ MonoBehaviour:
   voterNameTextComp: {fileID: 1266029577}
   _votingBtnPrefab: {fileID: 4619482348945985563, guid: 347d55cdfd4412943a368fc36140e90c, type: 3}
   _skipVoteBtn: {fileID: 1226171933}
+--- !u!225 &545304247
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 545304242}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &704473674
 GameObject:
   m_ObjectHideFlags: 0

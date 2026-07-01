@@ -45,7 +45,9 @@ public class RoundManager : NetworkBehaviour
 
     private void Start()
     {
-        
+        if (IsHost) return;
+
+        LoadingScreenUI.instance.StartLoading();
     }
 
     public override void OnNetworkSpawn()
@@ -63,7 +65,6 @@ public class RoundManager : NetworkBehaviour
 
         _currentPlayerIndex.OnValueChanged += (previousValue, newValue) =>
         {
-            if (IsHost) return;
 
             if (_currentPhase.Value == GamePhase.Clue)
             {
@@ -80,8 +81,12 @@ public class RoundManager : NetworkBehaviour
     private IEnumerator RegisterAfterSpawn()
     {
         Debug.Log("RegisterAfterSpawn: waiting for NetworkPlayerManager");
-        yield return new WaitUntil(() => NetworkPlayerManager.instance != null && NetworkPlayerManager.instance.IsSpawned);
+        yield return new WaitUntil(() => NetworkPlayerManager.instance != null && NetworkPlayerManager.instance.IsSpawned && NetworkPlayerManager.instance.gameObject.scene.isLoaded);
+
+        yield return null;
+
         Debug.Log("RegisterAfterSpawn: NetworkPlayerManager ready, registering as " + GameData.devicePlayerName);
+
         if (GameData.isOnline && !IsHost)
         {
             Lobby lobby = LobbyManager.instance.CurrentLobby;

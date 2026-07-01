@@ -126,6 +126,7 @@ public class LobbyCreationUI : MonoBehaviour
             if (LobbyManager.instance.IsOnline)
             {
                 _ = StartOnlineGameFlow();
+                    LoadingScreenUI.instance.StartLoading();
             }
             else
             {
@@ -211,8 +212,13 @@ public class LobbyCreationUI : MonoBehaviour
     {
         SaveDataToGameDataClass();
         string hostName = playerNamesContainer.GetChild(0).GetComponentInChildren<TextMeshProUGUI>().text;
-        await LobbyManager.instance.StartOnlineGame(hostName);
+        LoadingScreenUI.instance.StartLoading();
+        bool isSuccess = await LobbyManager.instance.StartOnlineGame(hostName);
+        LoadingScreenUI.instance.StopLoading();
+        if (!isSuccess) return;
+
         SceneManager.LoadScene("Lobby");
+
     }
 
 

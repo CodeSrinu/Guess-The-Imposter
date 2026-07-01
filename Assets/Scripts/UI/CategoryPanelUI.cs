@@ -56,6 +56,11 @@ public class CategoryPanelUI : MonoBehaviour
 
             btnScript.isSelected = hasSavedData ? savedSelectedCategories.Contains(category) : true;
 
+            if (btnScript.isSelected)
+                WordManager.instance.AddCategory(category);
+
+            btnScript.ChangeTheBtnStatus(btnScript.isSelected);
+
             obj.GetComponentInChildren<TextMeshProUGUI>().text = category;
         }
     }
