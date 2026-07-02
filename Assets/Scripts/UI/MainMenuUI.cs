@@ -84,7 +84,6 @@ public class MainMenuUI : MonoBehaviour
             if (IsValidName())
             {
                 playerNameErrMsgTxt.gameObject.SetActive(false);
-                LoadingScreenUI.instance.StartLoading();
                 _ = JoinLobbyFlow();
             }
             else
@@ -140,6 +139,7 @@ public class MainMenuUI : MonoBehaviour
         
         if(result)
         {
+            LoadingScreenUI.instance.StartLoading();
             roomCodeErrMsgTxt.gameObject.SetActive(false); 
             GameData.isOnline = true;
             goToLobbyScene();
