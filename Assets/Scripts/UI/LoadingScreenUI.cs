@@ -48,7 +48,7 @@ public class LoadingScreenUI : MonoBehaviour
         loadingErrorScreenObj.SetActive(false);
         loadingScreenObj.SetActive(true);
 
-        Invoke("StopLoading", 15f);
+        Invoke("StopLoading", 30f);
     }
 
     public void StopLoading()

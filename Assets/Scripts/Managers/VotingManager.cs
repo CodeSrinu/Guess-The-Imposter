@@ -135,6 +135,18 @@ public class VotingManager : NetworkBehaviour
         List<int> playerVotes = _votes.Values.ToList();
         List<Player> highestVotedPlayersList = new List<Player>();
 
+        if(_votes.Values.All(v => v == 0))
+        {
+            ResetVotes();
+            if(GameData.isOnline)
+            {
+                onPlayerEliminated?.Invoke(null);
+                BroadCastEliminationClientRpc("");
+                RoundManager.instance.StartClueAfterVote();
+            }
+
+        }
+
 
         foreach(Player player in _votes.Keys)
         {

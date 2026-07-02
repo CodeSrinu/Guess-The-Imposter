@@ -14,7 +14,7 @@ public class VotingPanelUI : MonoBehaviour
     public Button GetSkipBtn => _skipVoteBtn;
     public Transform GetVotingGridContainer => _votingGridContainer;
 
-    private void Start()
+    private void Awake()
     {
         _canvasGroup = GetComponent<CanvasGroup>();
     }

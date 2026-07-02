@@ -84,6 +84,7 @@ public class MainMenuUI : MonoBehaviour
             if (IsValidName())
             {
                 playerNameErrMsgTxt.gameObject.SetActive(false);
+                LoadingScreenUI.instance.StartLoading();
                 _ = JoinLobbyFlow();
             }
             else

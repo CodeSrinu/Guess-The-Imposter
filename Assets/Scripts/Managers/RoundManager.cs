@@ -81,8 +81,14 @@ public class RoundManager : NetworkBehaviour
     private IEnumerator RegisterAfterSpawn()
     {
         Debug.Log("RegisterAfterSpawn: waiting for NetworkPlayerManager");
-        yield return new WaitUntil(() => NetworkPlayerManager.instance != null && NetworkPlayerManager.instance.IsSpawned && NetworkPlayerManager.instance.gameObject.scene.isLoaded);
+        yield return new WaitUntil(() => NetworkPlayerManager.instance != null && NetworkPlayerManager.instance.IsSpawned && NetworkPlayerManager.instance.gameObject.scene.isLoaded && LobbyManager.instance.CurrentLobby != null);
 
+        yield return null;
+        yield return null;
+        yield return null;
+        yield return null;
+        yield return null;
+        yield return null;
         yield return null;
 
         Debug.Log("RegisterAfterSpawn: NetworkPlayerManager ready, registering as " + GameData.devicePlayerName);

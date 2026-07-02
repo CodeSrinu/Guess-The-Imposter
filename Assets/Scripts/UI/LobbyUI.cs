@@ -34,6 +34,10 @@ public class LobbyUI : MonoBehaviour
             {
                 NetworkManager.Singleton.SceneManager.LoadScene("Game", LoadSceneMode.Single);
             }
+            else
+            {
+                LoadingScreenUI.instance.ShowLoadingError("Need at least 3 memebers to start the game");
+            }
         });
 
         leaveLobbyBtn.onClick.AddListener(() =>
@@ -85,7 +89,9 @@ public class LobbyUI : MonoBehaviour
             InstantiateJoinedPlayers("Free Player Slot");
         }
 
-        foreach(string p in playerNames)
+        LoadingScreenUI.instance.StopLoading();
+
+        foreach (string p in playerNames)
         {
             if (!_prevPlayerNames.Contains(p))
             {
