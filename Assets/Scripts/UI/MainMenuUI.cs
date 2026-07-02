@@ -135,17 +135,18 @@ public class MainMenuUI : MonoBehaviour
     {
         string roomCode = roomCodeInputFeildComp.text;
         string playerName = playerNameInputFeildComp.text;
+        LoadingScreenUI.instance.StartLoading();
         bool result = await LobbyManager.instance.JoinLobby(roomCode, playerName);
         
         if(result)
         {
-            LoadingScreenUI.instance.StartLoading();
             roomCodeErrMsgTxt.gameObject.SetActive(false); 
             GameData.isOnline = true;
             goToLobbyScene();
         }
         else
         {
+            LoadingScreenUI.instance.StopLoading();
             roomCodeErrMsgTxt.gameObject.SetActive(true);
         }
     }

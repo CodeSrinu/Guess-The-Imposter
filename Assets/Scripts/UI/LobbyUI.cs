@@ -32,6 +32,16 @@ public class LobbyUI : MonoBehaviour
         {
             if (LobbyManager.instance.CurrentLobby.Players.Count >= 3)
             {
+                GameData.playerNames.Clear();
+                foreach (var player in LobbyManager.instance.CurrentLobby.Players)
+                {
+                    GameData.playerNames.Add(player.Data["PlayerName"].Value.Trim()
+                        .Replace("\u200B", "").Replace("\u200C", "").Replace("\u200D", ""));
+                }
+                GameData.playersCount = LobbyManager.instance.CurrentLobby.Players.Count;
+
+                //LoadingScreenUI.instance.StartLoading();
+
                 NetworkManager.Singleton.SceneManager.LoadScene("Game", LoadSceneMode.Single);
             }
             else
@@ -42,7 +52,10 @@ public class LobbyUI : MonoBehaviour
 
         leaveLobbyBtn.onClick.AddListener(() =>
         {
+            LoadingScreenUI.instance.StartLoading();
             _ = LeaveLobbyFlow();
+            LoadingScreenUI.instance.StopLoading();
+
         });
     }
 

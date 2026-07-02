@@ -84,12 +84,7 @@ public class RoundManager : NetworkBehaviour
         yield return new WaitUntil(() => NetworkPlayerManager.instance != null && NetworkPlayerManager.instance.IsSpawned && NetworkPlayerManager.instance.gameObject.scene.isLoaded && LobbyManager.instance.CurrentLobby != null);
 
         yield return null;
-        yield return null;
-        yield return null;
-        yield return null;
-        yield return null;
-        yield return null;
-        yield return null;
+
 
         Debug.Log("RegisterAfterSpawn: NetworkPlayerManager ready, registering as " + GameData.devicePlayerName);
 
@@ -111,6 +106,7 @@ public class RoundManager : NetworkBehaviour
             {
 
                 NetworkPlayerManager.instance.RegisterClientServerRpc(myName, NetworkManager.Singleton.LocalClientId);
+                LoadingScreenUI.instance.StopLoading();
             }
         }
     }

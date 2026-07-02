@@ -13,6 +13,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject votingPanel;
     [SerializeField] private GameObject resultPanel;
     [SerializeField] private GameObject votingResultPanel;
+    [SerializeField] private TextMeshProUGUI debugTextComp;
 
     private Player _currentPlayer;
 
@@ -211,6 +212,13 @@ public class UIManager : MonoBehaviour
         VotingPanelUI votingPanelScript = votingPanel.GetComponent<VotingPanelUI>();
         votingPanelScript.DestroyAllVotingBtns();
         votingPanelScript.InstantiateVotingBtns(PlayerManager.instance.GetActivePlayers());
+
+        string debugInfo = "Device: '" + GameData.devicePlayerName + "'\n";
+        foreach (var p in NetworkPlayerManager.instance.Players)
+        {
+            debugInfo += "P: '" + p.name + "' elim=" + p.isEliminated + "\n";
+        }
+        debugTextComp.text = debugInfo;
 
         bool isLocalPlayerEliminated = GameData.isOnline ? NetworkPlayerManager.instance.IsPlayerEliminated(GameData.devicePlayerName) : false;
 

@@ -213,7 +213,7 @@ public class LobbyCreationUI : MonoBehaviour
         string hostName = playerNamesContainer.GetChild(0).GetComponentInChildren<TextMeshProUGUI>().text;
         LoadingScreenUI.instance.StartLoading();
         bool isSuccess = await LobbyManager.instance.StartOnlineGame(hostName);
-        //LoadingScreenUI.instance.StopLoading();
+        
         Debug.Log("isSuccess: " + isSuccess);
         
         if (!isSuccess) return;

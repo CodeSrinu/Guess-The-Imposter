@@ -143,8 +143,8 @@ public class VotingManager : NetworkBehaviour
                 onPlayerEliminated?.Invoke(null);
                 BroadCastEliminationClientRpc("");
                 RoundManager.instance.StartClueAfterVote();
+                return;
             }
-
         }
 
 
