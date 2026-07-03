@@ -32,11 +32,6 @@ public class GameManager : NetworkBehaviour
         }
     }
 
-    public override void OnNetworkSpawn()
-    {
-        if (!IsHost) return;
-        RoundManager.instance.StartGame();
-    }
 
     
 }

@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using Unity.Netcode;
 using Unity.Services.Authentication;
 using Unity.Services.Lobbies.Models;
@@ -81,10 +80,33 @@ public class RoundManager : NetworkBehaviour
     private IEnumerator RegisterAfterSpawn()
     {
         Debug.Log("RegisterAfterSpawn: waiting for NetworkPlayerManager");
-        yield return new WaitUntil(() => NetworkPlayerManager.instance != null && NetworkPlayerManager.instance.IsSpawned && NetworkPlayerManager.instance.gameObject.scene.isLoaded && LobbyManager.instance.CurrentLobby != null);
+        float elapsed = 0f;
+        float timeout = 10f;
 
-        yield return null;
+        while (elapsed < timeout)
+        {
+            bool npmReady = NetworkPlayerManager.instance != null;
+            bool spawned = npmReady && NetworkPlayerManager.instance.IsSpawned;
+            bool sceneReady = npmReady && NetworkPlayerManager.instance.gameObject.scene.isLoaded;
+            bool lobbyReady = LobbyManager.instance != null && LobbyManager.instance.CurrentLobby != null;
 
+            if (npmReady && spawned && sceneReady && lobbyReady)
+                break;
+
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        if(elapsed >= timeout)
+        {
+            Debug.LogError($"RegisterAfterSpawn TIMEOUT — npm:{NetworkPlayerManager.instance != null} " +
+                            $"spawned:{NetworkPlayerManager.instance?.IsSpawned} " +
+                            $"sceneLoaded:{NetworkPlayerManager.instance?.gameObject.scene.isLoaded} " +
+                            $"lobby:{LobbyManager.instance?.CurrentLobby != null}");
+
+            LoadingScreenUI.instance.ShowLoadingError("Failed To Join Game, Please Try Again!");
+            yield break;
+        }
 
         Debug.Log("RegisterAfterSpawn: NetworkPlayerManager ready, registering as " + GameData.devicePlayerName);
 
@@ -92,6 +114,15 @@ public class RoundManager : NetworkBehaviour
         {
             Lobby lobby = LobbyManager.instance.CurrentLobby;
             string myName = "";
+
+
+            if (string.IsNullOrEmpty(AuthenticationService.Instance.PlayerId))
+            {
+                Debug.LogError("RegisterAfterSpawn: PlayerId not ready, cannot match lobby player");
+                LoadingScreenUI.instance.ShowLoadingError("Sign not complete, please restart");
+                yield break;
+            }
+
 
             foreach (var player in lobby.Players)
             {
@@ -102,41 +133,38 @@ public class RoundManager : NetworkBehaviour
                     break;
                 }
             }
+
+            if (string.IsNullOrEmpty(myName))
+            {
+                Debug.LogError("RegisterAfterSpawn: could not find matching player in lobby data");
+                LoadingScreenUI.instance.ShowLoadingError("failed to sync player data, please try again");
+                yield break;
+            }
+
             if (!IsHost)
             {
-
                 NetworkPlayerManager.instance.RegisterClientServerRpc(myName, NetworkManager.Singleton.LocalClientId);
                 LoadingScreenUI.instance.StopLoading();
             }
         }
     }
 
+
+
+
     public void StartGame()
     {
-        if(!IsHost && GameData.isOnline) return;
+        if (GameData.isOnline && !IsHost) return;
 
         NetworkPlayerManager.instance.ResetRegistrationState();
 
-        Debug.Log("StartGame called, playerNames count: " + GameData.playerNames.Count);
-
         _currentRound.Value = 1;
 
-        if(GameData.isOnline)
-        {
-            GameData.playerNames.Clear();
-            foreach(var player in LobbyManager.instance.CurrentLobby.Players)
-            {
-                GameData.playerNames.Add(player.Data["PlayerName"].Value.Trim().Replace("\u200B", "").Replace("\u200C", "").Replace("\u200D", ""));
-            }
-        }
         LobbyManager.instance.StopPolling();
-        Debug.Log("After populating, playerNames: " + string.Join(", ", GameData.playerNames));
 
         PlayerManager.instance.InitilizeGame();
         PlayerManager.instance.ShufflePlayerOrder();
 
-
-        
         NetworkPlayerManager.instance.PopulatePlayers();
         if (!GameData.isOnline)
         {

@@ -30,7 +30,7 @@ public class LobbyUI : MonoBehaviour
     {
         startBtn.onClick.AddListener(() =>
         {
-            if (LobbyManager.instance.CurrentLobby.Players.Count >= 3)
+            if (LobbyManager.instance.CurrentLobby.Players.Count >= 2)
             {
                 GameData.playerNames.Clear();
                 foreach (var player in LobbyManager.instance.CurrentLobby.Players)

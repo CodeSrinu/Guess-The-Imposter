@@ -70,6 +70,7 @@ public class NetworkPlayerManager : NetworkBehaviour
         _registeredClientsCount++;
         if (_registeredClientsCount >= GameData.playerNames.Count - 1)
         {
+            RoundManager.instance.StartGame();
             FixedString64Bytes[] orderedNames = PlayerManager.instance.GetPlayers
                 .Select(p => new FixedString64Bytes(p.name))
                 .ToArray();
@@ -85,6 +86,7 @@ public class NetworkPlayerManager : NetworkBehaviour
         if (IsHost) return;
         Timer.instance.StartTimer(duration, null);
     }
+
 
     [ClientRpc]
     public void StopTimerClientRpc()
@@ -147,7 +149,6 @@ public class NetworkPlayerManager : NetworkBehaviour
         isImposter = _isImposter;
         assignedWord = _assignedWord;
         LoadingScreenUI.instance.StopLoading();
-        UIManager.instance.SetUpWordRevealPanel();
         ConfirmReceivedWordServerRpc();
     }
 

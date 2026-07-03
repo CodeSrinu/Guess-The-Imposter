@@ -93,19 +93,19 @@ public class LobbyManager : MonoBehaviour
         try
         {
             Dictionary<string, DataObject> lobbyData = new Dictionary<string, DataObject>
-        {
-            {"RelayJoinCode" , new DataObject(DataObject.VisibilityOptions.Member, relayJoinCode) },
-            {"RoundsCount", new DataObject(DataObject.VisibilityOptions.Member, GameData.roundsCount.ToString()) },
-            {"ImposterCount", new DataObject(DataObject.VisibilityOptions.Member, GameData.imposterCount.ToString()) },
-            {"VotingDuration", new DataObject(DataObject.VisibilityOptions.Member, GameData.votingDuration.ToString()) },
-            {"CanImposterHaveWord", new DataObject(DataObject.VisibilityOptions.Member, GameData.canImposterHaveWord.ToString())},
-            {"PlayersCount", new DataObject(DataObject.VisibilityOptions.Member, GameData.playersCount.ToString()) } 
-        };
+            {
+                {"RelayJoinCode" , new DataObject(DataObject.VisibilityOptions.Member, relayJoinCode) },
+                {"RoundsCount", new DataObject(DataObject.VisibilityOptions.Member, GameData.roundsCount.ToString()) },
+                {"ImposterCount", new DataObject(DataObject.VisibilityOptions.Member, GameData.imposterCount.ToString()) },
+                {"VotingDuration", new DataObject(DataObject.VisibilityOptions.Member, GameData.votingDuration.ToString()) },
+                {"CanImposterHaveWord", new DataObject(DataObject.VisibilityOptions.Member, GameData.canImposterHaveWord.ToString())},
+                {"PlayersCount", new DataObject(DataObject.VisibilityOptions.Member, GameData.playersCount.ToString()) } 
+            };
 
             Dictionary<string, PlayerDataObject> hostPlayerData = new Dictionary<string, PlayerDataObject>
-        {
-            {"PlayerName", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, hostName) }
-        };
+            {
+                {"PlayerName", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, hostName) }
+            };
 
             CreateLobbyOptions lobbyOptions = new CreateLobbyOptions
             {
