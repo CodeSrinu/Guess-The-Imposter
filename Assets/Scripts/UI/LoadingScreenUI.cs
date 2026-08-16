@@ -6,7 +6,7 @@ public class LoadingScreenUI : MonoBehaviour
 {
     [SerializeField] private GameObject loadingPrefab;
     [SerializeField] private GameObject errorLoadingPrefab;
-    [SerializeField] private Button errorPanelCloseBtn;
+    private Button errorPanelCloseBtn;
 
     private GameObject loadingScreenObj;
     private GameObject loadingErrorScreenObj;
