@@ -20,8 +20,6 @@ public class VotingManager : NetworkBehaviour
     public int EligibleVoters => _votes.Count;
 
 
-    
-
     private void Awake()
     {
         if(instance != null && instance != this)
@@ -30,7 +28,6 @@ public class VotingManager : NetworkBehaviour
             return;
         }
         instance = this;
-        
     }
 
 

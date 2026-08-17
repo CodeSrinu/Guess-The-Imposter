@@ -119,7 +119,7 @@ public class RoundManager : NetworkBehaviour
             if (string.IsNullOrEmpty(AuthenticationService.Instance.PlayerId))
             {
                 Debug.LogError("RegisterAfterSpawn: PlayerId not ready, cannot match lobby player");
-                LoadingScreenUI.instance.ShowLoadingError("Sign not complete, please restart");
+                LoadingScreenUI.instance.ShowLoadingError("Sign In not complete, please restart");
                 yield break;
             }
 

@@ -13,7 +13,7 @@ public class NetworkPlayerManager : NetworkBehaviour
 
 
     private Dictionary<string, ulong> _privateClientIds = new Dictionary<string, ulong>();
-    private int _registeredClientsCount;
+    private int _registeredClientsCount = 0;
     private int _confirmedClientCount = 0;
     public static NetworkPlayerManager instance;
 
@@ -70,7 +70,6 @@ public class NetworkPlayerManager : NetworkBehaviour
         _registeredClientsCount++;
         if (_registeredClientsCount >= GameData.playerNames.Count - 1)
         {
-            RoundManager.instance.StartGame();
             FixedString64Bytes[] orderedNames = PlayerManager.instance.GetPlayers
                 .Select(p => new FixedString64Bytes(p.name))
                 .ToArray();
@@ -101,7 +100,10 @@ public class NetworkPlayerManager : NetworkBehaviour
 
         foreach (Player player in PlayerManager.instance.GetPlayers)
         {
-            if (!_privateClientIds.ContainsKey(player.name)) continue;
+            if (!_privateClientIds.ContainsKey(player.name))
+            {
+                continue;
+            }
 
 
             ClientRpcParams rpcParams = new ClientRpcParams
@@ -146,9 +148,10 @@ public class NetworkPlayerManager : NetworkBehaviour
     [ClientRpc]
     private void ReceivePrivateDataClientRpc(bool _isImposter, string _assignedWord, ClientRpcParams rpcParams)
     {
+        Debug.Log("ReceivePrivateDataClientRpc, ");
         isImposter = _isImposter;
         assignedWord = _assignedWord;
-        LoadingScreenUI.instance.StopLoading();
+        //LoadingScreenUI.instance.StopLoading();
         ConfirmReceivedWordServerRpc();
     }
 

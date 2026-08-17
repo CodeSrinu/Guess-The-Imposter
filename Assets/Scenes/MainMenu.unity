@@ -3756,7 +3756,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   loadingPrefab: {fileID: 8232208560040423610, guid: 01141e27bccf885498805d724b4c77bc, type: 3}
   errorLoadingPrefab: {fileID: 412432772307778470, guid: 8282c953dd3228e4b803442ceb712011, type: 3}
-  errorPanelCloseBtn: {fileID: 0}
 --- !u!114 &1603590277
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5218,9 +5217,9 @@ SceneRoots:
   m_Roots:
   - {fileID: 519420032}
   - {fileID: 619394802}
+  - {fileID: 1603590280}
   - {fileID: 594333783}
   - {fileID: 579829440}
   - {fileID: 1957257974}
   - {fileID: 1471520287}
   - {fileID: 2036041314}
-  - {fileID: 1603590280}
