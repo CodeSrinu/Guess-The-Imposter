@@ -148,10 +148,10 @@ public class NetworkPlayerManager : NetworkBehaviour
     [ClientRpc]
     private void ReceivePrivateDataClientRpc(bool _isImposter, string _assignedWord, ClientRpcParams rpcParams)
     {
-        Debug.Log("ReceivePrivateDataClientRpc, ");
         isImposter = _isImposter;
         assignedWord = _assignedWord;
-        //LoadingScreenUI.instance.StopLoading();
+        UIManager.instance.SetUpWordRevealPanel();
+        LoadingScreenUI.instance.StopLoading();
         ConfirmReceivedWordServerRpc();
     }
 
