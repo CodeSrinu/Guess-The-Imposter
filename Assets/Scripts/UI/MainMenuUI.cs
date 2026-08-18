@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using TMPro;
 using Unity.Netcode;
@@ -36,10 +34,11 @@ public class MainMenuUI : MonoBehaviour
         {
             NetworkManager.Singleton.Shutdown();
         }
-        if(LobbyManager.instance != null)
-        {
-            LobbyManager.instance.StopPolling();
-        }
+
+        //if(LobbyManager.instance != null)
+        //{
+        //    LobbyManager.instance.StopPolling();
+        //}
 
         createGameBtn.onClick.AddListener(() =>
         {
@@ -91,9 +90,14 @@ public class MainMenuUI : MonoBehaviour
                 playerNameErrMsgTxt.gameObject.SetActive(true);
             }
         });
-
+        playerNameInputFeildComp.text = GetRandomString();
 
         _ = SignIn();
+
+        string GetRandomString()
+        {
+            return "Client" + UnityEngine.Random.Range(0, 99);
+        }
     }
 
     public void goToLobbyCreationScene()

@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -169,10 +168,13 @@ public class LobbyCreationUI : MonoBehaviour
 
     public void InstantiateInputFields(int count)
     {
-        for(int i = 0; i < count; i++)
+        for (int i = 0; i < count; i++)
         {
             var prefab = Instantiate(playerNameInputFiledPrefab);
             prefab.transform.SetParent(playerNamesContainer, false);
+
+
+            prefab.GetComponentInChildren<TMP_InputField>().text = "Host" + Random.Range(0, 99);
         }
     }
 

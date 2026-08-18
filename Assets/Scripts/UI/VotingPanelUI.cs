@@ -44,7 +44,9 @@ public class VotingPanelUI : MonoBehaviour
 
     public void SetWhosTurn(string name)
     {
-        voterNameTextComp.text = name + "\' turn to vote";
+        if (name != "") name = name + "\' turn to vote";
+
+        voterNameTextComp.text = name;
     }
     public void SetSpectatorMode()
     {

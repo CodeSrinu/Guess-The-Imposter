@@ -196,7 +196,7 @@ public class VotingManager : NetworkBehaviour
 
         yield return new WaitForSeconds(3f);
 
-        RoundManager.GameResult result = RoundManager.instance.CheckWinCondition();
+        RoundManager.GameResult result = RoundManager.instance.CheckWhoWon();
 
         if (result is not RoundManager.GameResult.None)
             RoundManager.instance.EndGame(result);

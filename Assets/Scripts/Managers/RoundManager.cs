@@ -253,7 +253,7 @@ public class RoundManager : NetworkBehaviour
         PlayerManager.instance.ResetClueStatus();
         SetPhase(GamePhase.Clue);
     }
-    public GameResult CheckWinCondition()
+    public GameResult CheckWhoWon()
     {
         int remainingImposters = 0;
         int remainingCivilians = 0;
