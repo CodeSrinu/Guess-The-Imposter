@@ -9,8 +9,10 @@ public class GameManager : NetworkBehaviour
 
     private void Awake()
     {
-        if(instance != null && instance != this)
+        Debug.Log($"GameManager.Awake, instance hash before: {(instance != null ? instance.GetHashCode() : -1)}, this hash: {GetHashCode()}");
+        if (instance != null && instance != this)
         {
+            Debug.LogError($"GameManager destroying duplicate. Surviving instance hash: {instance.GetHashCode()}, destroyed hash: {GetHashCode()}");
             Destroy(gameObject);
             return;
         }
@@ -25,14 +27,22 @@ public class GameManager : NetworkBehaviour
         {
             RoundManager.instance.StartGame();
         }
+
+        if(GameData.isOnline && IsHost)
+        {
+            RoundManager.instance.StartGame();
+        }
     }
 
-    public override void OnNetworkSpawn()
-    {
-        if (!IsHost) return;
+    //public override void OnNetworkSpawn()
+    //{
+    //    Debug.Log("OnNetworkSpawn called before !isHost");
 
-        RoundManager.instance.StartGame();
-    }
+    //    if (!IsHost) return;
+    //    Debug.Log("OnNetworkSpawn called After !isHost");
+
+    //    RoundManager.instance.StartGame();
+    //}
 
 
 }

@@ -32,17 +32,17 @@ public class PlayerManager : MonoBehaviour
         var list = new List<Player>();
         foreach (Player player in _players)
         {
-            PlayerNetworkData? netData = null;
+            bool isEliminated = false;
             foreach (var p in NetworkPlayerManager.instance.Players)
             {
                 if (p.name.ToString() == player.name)
                 {
-                    netData = p;
+                    isEliminated = p.isEliminated;
                     break;
                 }
             }
 
-            if (!netData.Value.isEliminated)
+            if (!isEliminated)
             {
                 list.Add(player);
             }
