@@ -13,7 +13,6 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject votingPanel;
     [SerializeField] private GameObject resultPanel;
     [SerializeField] private GameObject votingResultPanel;
-    [SerializeField] private TextMeshProUGUI debugTextComp;
 
     private Player _currentPlayer;
 
@@ -86,14 +85,14 @@ public class UIManager : MonoBehaviour
     {
         votingResultPanel.SetActive(true);
 
-        ShowVotingResultPanel votingResultPanelScript = votingResultPanel.GetComponent<ShowVotingResultPanel>();
+        VotingResultUI votingResultPanelScript = votingResultPanel.GetComponent<VotingResultUI>();
         if(player == null)
         {
             votingResultPanelScript.SetTieResult();
         }
         else
         {
-            votingResultPanelScript.SetVotingPanelResult(player);
+            votingResultPanelScript.SetVotingResultPanel(player);
         }
 
         VotingPanelUI votingPanelScript = votingPanel.GetComponent<VotingPanelUI>();
@@ -126,18 +125,23 @@ public class UIManager : MonoBehaviour
         }
         else if(phase == RoundManager.GamePhase.Result)
         {
-            ResultPanelUI resultPanelUIScript = resultPanel.GetComponent<ResultPanelUI>();
-
-            StartCoroutine(resultPanelUIScript.ShowGameResult(RoundManager.instance.result));
-            
+            StartCoroutine(WaitForResultAndShow()); 
         }
         Debug.Log("HandlePhaseChanged: " + phase);
+
+
+        IEnumerator WaitForResultAndShow()
+        {
+            while(RoundManager.instance.result == RoundManager.GameResult.None) yield return null;
+
+            ResultPanelUI resultPanelUIScript = resultPanel.GetComponent<ResultPanelUI>();
+            resultPanelUIScript.ShowGameResult(RoundManager.instance.result);
+        }
     }
+
 
     public void HandleVoterChanged(int newPlayerIndex)
     {
-        Debug.Log("HandleVoterChanged: newPlayerIndex=" + newPlayerIndex + " activeCount=" + PlayerManager.instance.GetActivePlayers().Count);
-
         if (newPlayerIndex >= PlayerManager.instance.GetActivePlayers().Count) return;
 
         Player player = PlayerManager.instance.GetActivePlayers()[newPlayerIndex];
@@ -161,7 +165,6 @@ public class UIManager : MonoBehaviour
         bool isImposter = GameData.isOnline ? NetworkPlayerManager.instance.isImposter : _currentPlayer.isImposter;
         string assignedWord = GameData.isOnline ? NetworkPlayerManager.instance.assignedWord : _currentPlayer.assignedWord;
 
-        Debug.Log($"Wordreveal panel, isImposter:{isImposter} assignedWord:{assignedWord}");
 
         //set word
         if (GameData.canImposterHaveWord && isImposter)
@@ -212,13 +215,6 @@ public class UIManager : MonoBehaviour
         VotingPanelUI votingPanelScript = votingPanel.GetComponent<VotingPanelUI>();
         votingPanelScript.DestroyAllVotingBtns();
         votingPanelScript.InstantiateVotingBtns(PlayerManager.instance.GetActivePlayers());
-
-        string debugInfo = "Device: '" + GameData.devicePlayerName + "'\n";
-        foreach (var p in NetworkPlayerManager.instance.Players)
-        {
-            debugInfo += "P: '" + p.name + "' elim=" + p.isEliminated + "\n";
-        }
-        debugTextComp.text = debugInfo;
 
         bool isLocalPlayerEliminated = GameData.isOnline ? NetworkPlayerManager.instance.IsPlayerEliminated(GameData.devicePlayerName) : false;
 

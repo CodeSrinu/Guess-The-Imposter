@@ -29,26 +29,14 @@ public class PlayerManager : MonoBehaviour
             return _players.Where(p => !p.isEliminated).ToList();
         }
 
-        var list = new List<Player>();
-        foreach (Player player in _players)
+        var list = new List<PlayerNetworkData>();
+        foreach (var networkPlayer in NetworkPlayerManager.instance.Players)
         {
-            bool isEliminated = false;
-            foreach (var p in NetworkPlayerManager.instance.Players)
-            {
-                if (p.name.ToString() == player.name)
-                {
-                    isEliminated = p.isEliminated;
-                    break;
-                }
-            }
-
-            if (!isEliminated)
-            {
-                list.Add(player);
-            }
+            if (!networkPlayer.isEliminated) list.Add(networkPlayer);
         }
-
-        return list;
+        
+        
+        return _players.Where(p=> list.Any(np=> np.name == p.name)).ToList();
     }
 
     private void SetUpPlayers()

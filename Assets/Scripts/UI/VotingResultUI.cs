@@ -1,9 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-public class ShowVotingResultPanel : MonoBehaviour
+public class VotingResultUI : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI _eliminatedPlayerTxtComp;
     [SerializeField] private TextMeshProUGUI _votedPlayerImposterStatusTxtComp;
@@ -11,14 +9,14 @@ public class ShowVotingResultPanel : MonoBehaviour
 
 
 
-    public void SetVotingPanelResult(Player player)
+    public void SetVotingResultPanel(Player player)
     {
         _eliminatedPlayerTxtComp.gameObject.SetActive(true);
         _imposterRemainingTxtComp.gameObject.SetActive(true);
 
         _eliminatedPlayerTxtComp.text = player.name + " is Eliminated";
         _votedPlayerImposterStatusTxtComp.text = player.isImposter ? player.name + " is Imposter" : player.name + " is not Imposter";
-        _imposterRemainingTxtComp.text = PlayerManager.instance.GetAllImposter().Count.ToString() + " Imposter remaining";
+        _imposterRemainingTxtComp.text = RoundManager.instance.remainingImposters.ToString() + " Imposter remaining";
     }
 
     public void SetTieResult()

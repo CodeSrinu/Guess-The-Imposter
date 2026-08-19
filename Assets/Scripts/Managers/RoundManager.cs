@@ -14,17 +14,18 @@ public class RoundManager : NetworkBehaviour
     public enum GameResult { None, ImpostersWon, CiviliansWon}
 
     private NetworkVariable<GamePhase> _currentPhase = new NetworkVariable<GamePhase>();
-    private GameResult _gameResult;
+    private NetworkVariable<GameResult> _gameResult = new NetworkVariable<GameResult>(GameResult.None);
 
     public event Action<GamePhase> onPhaseChanged;
     public event Action<int> onVoterChanged;
     public bool isInitialRoundsDone = false;
     public GamePhase currentPhase => _currentPhase.Value;
-
+    private NetworkVariable<int> _remianingImposters = new NetworkVariable<int>();
+    public int remainingImposters => _remianingImposters.Value;
     public int CurrentPlayerIndex => _currentPlayerIndex.Value;
     public int CurrentRound => _currentRound.Value;
 
-    public GameResult result => _gameResult;
+    public GameResult result => _gameResult.Value;
 
     public static RoundManager instance;
 
@@ -47,6 +48,17 @@ public class RoundManager : NetworkBehaviour
         if (IsHost) return;
 
         LoadingScreenUI.instance.StartLoading();
+        VotingManager.instance.onPlayerEliminated += HandlePlayerEliminated;
+    }
+
+    private void HandlePlayerEliminated(Player player)
+    {
+        if(player == null) return;
+
+        if (player.isImposter)
+        {
+            _remianingImposters.Value--; 
+        }
     }
 
     public override void OnNetworkSpawn()
@@ -161,10 +173,10 @@ public class RoundManager : NetworkBehaviour
         _currentRound.Value = 1;
 
         LobbyManager.instance.StopPolling();
-
         PlayerManager.instance.InitilizeGame();
         PlayerManager.instance.ShufflePlayerOrder();
 
+        _remianingImposters.Value = PlayerManager.instance.GetAllImposter().Count;
         NetworkPlayerManager.instance.PopulatePlayers();
         if (!GameData.isOnline)
         {
@@ -215,7 +227,7 @@ public class RoundManager : NetworkBehaviour
     {
         if (!IsHost && GameData.isOnline) return;
 
-        _gameResult = result;
+        _gameResult.Value = result;
         SetPhase(GamePhase.Result);
 
     }
@@ -275,12 +287,10 @@ public class RoundManager : NetworkBehaviour
 
         if (remainingImposters >= remainingCivilians)
         {
-            Debug.Log("Imposters Won");
             return GameResult.ImpostersWon;
         }
         else if (remainingImposters <= 0)
         {
-            Debug.Log("Civilians Won");
             return GameResult.CiviliansWon;
         }
         else
@@ -292,7 +302,6 @@ public class RoundManager : NetworkBehaviour
 
     public void NextPlayerClue()
     {
-        Debug.Log("NextPlayerClue is called by host");
         _currentPlayerIndex.Value++;
         
 
