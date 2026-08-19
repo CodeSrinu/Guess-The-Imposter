@@ -1,4 +1,5 @@
 using TMPro;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -33,7 +34,14 @@ public class CluePanelUI : MonoBehaviour
 
     public void OpenVotingTable()
     { 
-        RoundManager.instance.StartVoting();
+        if(GameData.isOnline && !NetworkManager.Singleton.IsHost)
+        {
+            RoundManager.instance.StartVotingServerRpc();
+        }
+        else
+        {
+            RoundManager.instance.StartVoting();
+        }
     }
 
 }

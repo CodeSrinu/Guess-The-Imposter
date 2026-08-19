@@ -223,6 +223,12 @@ public class RoundManager : NetworkBehaviour
         }
     }
 
+    [ServerRpc(RequireOwnership = false)]
+    public void StartVotingServerRpc()
+    {
+        StartVoting();
+    }
+
     public void EndGame(GameResult result)
     {
         if (!IsHost && GameData.isOnline) return;

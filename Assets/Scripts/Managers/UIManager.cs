@@ -54,10 +54,11 @@ public class UIManager : MonoBehaviour
             {
                 RoundManager.instance.NextPlayerClueServerRpc();
             }
-                SetUpCluePanel();
+            SetUpCluePanel();
         });
+
         cluePanelScript.GetVotingTableBtn.onClick.AddListener(() => {
-        cluePanelScript.OpenVotingTable();
+            cluePanelScript.OpenVotingTable();
         });
 
         VotingPanelUI votingPanelScript = votingPanel.GetComponent<VotingPanelUI>();

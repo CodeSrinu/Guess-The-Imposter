@@ -128,10 +128,6 @@ public class VotingManager : NetworkBehaviour
         NetworkPlayerManager.instance.StopTimerClientRpc();
 
         Player highestVotedPlayer = new Player();
-
-        List<int> playerVotes = _votes.Values.ToList();
-        List<Player> highestVotedPlayersList = new List<Player>();
-
         if(_votes.Values.All(v => v == 0))
         {
             ResetVotes();
@@ -144,19 +140,15 @@ public class VotingManager : NetworkBehaviour
             }
         }
 
-
         foreach(Player player in _votes.Keys)
         {
             if(_votes[player] == _votes.Values.Max())
             {
                 highestVotedPlayer = player;
-                highestVotedPlayersList.Add(player);
             }
         }
 
-        
-
-        if(highestVotedPlayersList.Count > 1)
+        if (_votes[highestVotedPlayer] <= _votes.Count/2)
         {
             //tie
             ResetVotes();
@@ -260,11 +252,8 @@ public class VotingManager : NetworkBehaviour
         Player player = PlayerManager.instance.GetPlayers.Find(p => p.name == playerName);  
 
         if (player == null)
-        {
-            Debug.LogError($"[ELIMINATION SYNC FAILED] Could not find '{playerName}' in local roster: " +
-            string.Join(", ", PlayerManager.instance.GetPlayers.Select(p => p.name)));
             return;
-        }
+
         player.isEliminated = true;
         onPlayerEliminated?.Invoke(player);
     }
