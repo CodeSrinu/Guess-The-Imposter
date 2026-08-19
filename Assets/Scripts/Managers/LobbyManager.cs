@@ -15,11 +15,12 @@ public class LobbyManager : MonoBehaviour
 {
     public static LobbyManager instance;
     private bool _isOnline = false;
-    private string _playerName;
+
     private Lobby _currentLobby;
 
     public event Action onLobbyUpdated;
     public Lobby CurrentLobby  => _currentLobby;
+    private bool _isPolling = false;
     public bool IsOnline
     {
         get => _isOnline;
@@ -88,8 +89,6 @@ public class LobbyManager : MonoBehaviour
 
     public async Task<string> CreateLobby(string relayJoinCode, string hostName)
     {
-
-        _playerName = hostName;
         try
         {
             Dictionary<string, DataObject> lobbyData = new Dictionary<string, DataObject>
@@ -158,9 +157,6 @@ public class LobbyManager : MonoBehaviour
     {
         try
         {
-
-            _playerName = playerName;
-
             Dictionary<string, PlayerDataObject> clientPlayerData = new Dictionary<string, PlayerDataObject> {
                 {"PlayerName", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, playerName) }
             };
@@ -259,7 +255,7 @@ public class LobbyManager : MonoBehaviour
     public async Task PollLobby()
     {
         Debug.Log("Inside Poll Lobby, curent lobby = " +  _currentLobby);
-        while(_currentLobby != null)
+        while(_currentLobby != null && _isPolling)
         {
             await Task.Delay(1500);
             _currentLobby = await LobbyService.Instance.GetLobbyAsync(_currentLobby.Id);
@@ -269,11 +265,12 @@ public class LobbyManager : MonoBehaviour
 
     public void StartPolling()
     {
+        _isPolling = true;
         _ = PollLobby();
     }
 
     public void StopPolling()
     {
-        _currentLobby = null;
+       _isPolling = false;
     }
 }

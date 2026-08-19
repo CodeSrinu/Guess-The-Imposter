@@ -154,15 +154,7 @@ public class VotingManager : NetworkBehaviour
             }
         }
 
-        for(int i = 0; i < NetworkPlayerManager.instance.Players.Count; i++)
-        {
-            if(NetworkPlayerManager.instance.Players[i].name == highestVotedPlayer.name)
-            {
-                var playerData = NetworkPlayerManager.instance.Players[i];
-                playerData.isEliminated = true;
-                NetworkPlayerManager.instance.Players[i] = playerData;
-            }
-        }
+        
 
         if(highestVotedPlayersList.Count > 1)
         {
@@ -186,6 +178,15 @@ public class VotingManager : NetworkBehaviour
             
             StartCoroutine(FinishVoting(highestVotedPlayer.name));
 
+            for (int i = 0; i < NetworkPlayerManager.instance.Players.Count; i++)
+            {
+                if (NetworkPlayerManager.instance.Players[i].name == highestVotedPlayer.name)
+                {
+                    var playerData = NetworkPlayerManager.instance.Players[i];
+                    playerData.isEliminated = true;
+                    NetworkPlayerManager.instance.Players[i] = playerData;
+                }
+            }
         }
 
     }

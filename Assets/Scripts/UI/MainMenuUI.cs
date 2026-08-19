@@ -35,10 +35,10 @@ public class MainMenuUI : MonoBehaviour
             NetworkManager.Singleton.Shutdown();
         }
 
-        //if(LobbyManager.instance != null)
-        //{
-        //    LobbyManager.instance.StopPolling();
-        //}
+        if (LobbyManager.instance != null)
+        {
+            LobbyManager.instance.StopPolling();
+        }
 
         createGameBtn.onClick.AddListener(() =>
         {
