@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Unity.Networking.Transport.Relay;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public class LobbyManager : MonoBehaviour
 {
@@ -103,7 +104,8 @@ public class LobbyManager : MonoBehaviour
 
             Dictionary<string, PlayerDataObject> hostPlayerData = new Dictionary<string, PlayerDataObject>
             {
-                {"PlayerName", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, hostName) }
+                {"PlayerName", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, hostName) },
+                {"IsReady", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, "true") }
             };
 
             CreateLobbyOptions lobbyOptions = new CreateLobbyOptions
@@ -272,5 +274,37 @@ public class LobbyManager : MonoBehaviour
     public void StopPolling()
     {
        _isPolling = false;
+    }
+
+
+    public void SetPlayerReadyStatus(bool ready)
+    {
+        UpdatePlayerOptions updatePlayerOptions = new UpdatePlayerOptions()
+        {
+            Data = new Dictionary<string, PlayerDataObject>()
+            {
+                { "IsReady", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, ready.ToString())}
+            }
+        };
+
+        LobbyService.Instance.UpdatePlayerAsync(
+            _currentLobby.Id,
+            AuthenticationService.Instance.PlayerId,
+            updatePlayerOptions
+        );
+        onLobbyUpdated?.Invoke();
+    }
+
+    public void KickPlayer(string playerName)
+    {
+        foreach(var player in _currentLobby.Players)
+        {
+            if (player.Data.TryGetValue("PlayerName", out var nameData) && nameData.Value == playerName)
+            {
+                LobbyService.Instance.RemovePlayerAsync(_currentLobby.Id, player.Id);
+                onLobbyUpdated?.Invoke();
+            }
+        }
+
     }
 }

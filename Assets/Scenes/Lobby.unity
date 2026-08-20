@@ -1338,6 +1338,7 @@ MonoBehaviour:
   announcementTxtPrefab: {fileID: 1417015755610408850, guid: 7bb930d4ee9dd6744b4caf9a201fba9a, type: 3}
   startBtn: {fileID: 357067879}
   leaveLobbyBtn: {fileID: 2117939310}
+  readyBtn: {fileID: 726011874}
 --- !u!1 &1176870161
 GameObject:
   m_ObjectHideFlags: 0

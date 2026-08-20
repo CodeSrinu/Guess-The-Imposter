@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using TMPro;
 using Unity.Netcode;
+using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -23,31 +24,19 @@ public class LobbyUI : MonoBehaviour
 
     [SerializeField] private Button startBtn;
     [SerializeField] private Button leaveLobbyBtn;
+    [SerializeField] private Button readyBtn;
+
+    private bool isReady = false;
 
     private List<string> _prevPlayerNames = new List<string>();
 
     private void Awake()
     {
+        readyBtn.gameObject.SetActive(!NetworkManager.Singleton.IsHost);
+
         startBtn.onClick.AddListener(() =>
         {
-            if (LobbyManager.instance.CurrentLobby.Players.Count >= 2)
-            {
-                GameData.playerNames.Clear();
-                foreach (var player in LobbyManager.instance.CurrentLobby.Players)
-                {
-                    GameData.playerNames.Add(player.Data["PlayerName"].Value.Trim()
-                        .Replace("\u200B", "").Replace("\u200C", "").Replace("\u200D", ""));
-                }
-                GameData.playersCount = LobbyManager.instance.CurrentLobby.Players.Count;
-
-                //LoadingScreenUI.instance.StartLoading();
-
-                NetworkManager.Singleton.SceneManager.LoadScene("Game", LoadSceneMode.Single);
-            }
-            else
-            {
-                LoadingScreenUI.instance.ShowLoadingError("Need at least 3 memebers to start the game");
-            }
+            CheckAllAreReadyAndStart();
         });
 
         leaveLobbyBtn.onClick.AddListener(() =>
@@ -57,6 +46,50 @@ public class LobbyUI : MonoBehaviour
             LoadingScreenUI.instance.StopLoading();
 
         });
+
+        readyBtn.onClick.AddListener(() =>
+        {
+            isReady = !isReady;
+            LobbyManager.instance.SetPlayerReadyStatus(isReady);
+            readyBtn.GetComponentInChildren<TextMeshProUGUI>().text = isReady ? "Cancel" : "Ready";
+        });
+    }
+
+    private void CheckAllAreReadyAndStart()
+    {
+        if (LobbyManager.instance.CurrentLobby.Players.Count < 3)
+        {
+            LoadingScreenUI.instance.ShowLoadingError("Need at least 3 players to start the game");
+            return;
+        }
+
+        int readyCount = 0;
+        foreach(var player in LobbyManager.instance.CurrentLobby.Players)
+        {
+            if (player.Data.TryGetValue("IsReady", out var readyData) && readyData.Value.ToLower() == "true")
+            {
+                readyCount++;
+            }
+        }
+        
+        if(readyCount < LobbyManager.instance.CurrentLobby.Players.Count - 1)//host is ready all the time that's why -1
+        {
+            LoadingScreenUI.instance.ShowLoadingError("Not All players are Ready");
+            return;
+        }
+
+        GameData.playerNames.Clear();
+        foreach (var player in LobbyManager.instance.CurrentLobby.Players)
+        {
+            GameData.playerNames.Add(player.Data["PlayerName"].Value.Trim()
+                .Replace("\u200B", "").Replace("\u200C", "").Replace("\u200D", ""));
+        }
+        GameData.playersCount = LobbyManager.instance.CurrentLobby.Players.Count;
+
+        LoadingScreenUI.instance.StartLoading();
+
+        NetworkManager.Singleton.SceneManager.LoadScene("Game", LoadSceneMode.Single);
+
     }
 
     private void Start()
@@ -69,7 +102,6 @@ public class LobbyUI : MonoBehaviour
     private void OnDestroy()
     {
         LobbyManager.instance.onLobbyUpdated -= HandleLobbyChange;
-
     }
 
     private void HandleLobbyChange()
@@ -81,25 +113,28 @@ public class LobbyUI : MonoBehaviour
         string roomCode = lobby.LobbyCode;
         List<string> playerNames = new List<string>();
 
-
-        foreach(var player in  lobby.Players)
+        DestroyJoinedPlayerNames();
+        foreach (var player in  lobby.Players)
         {
-            playerNames.Add(player.Data["PlayerName"].Value.Trim());
+            string name = player.Data.TryGetValue("PlayerName",out var nameData) ? nameData.Value : "Free Player Slot";
+            bool isReady = false;
+            bool isThisPlayerHost = player.Id == lobby.HostId;
+            if(player.Data.TryGetValue("IsReady", out var readyData))
+            {
+                isReady = readyData.Value.ToLower() == "true";                                                  
+            }
+
+            playerNames.Add(name);
+            InstantiateJoinedPlayers(name, isReady, isThisPlayerHost);
         }
 
         playersJoinedTxtComp.text = "Players Joined: " + playerJoined.ToString();
         roomCodeTxtComp.text = "Room Code: "+ roomCode;
         remainiingSlotsTxtComp.text =  "Slots Remaining: " + (GameData.playersCount - playerJoined);
 
-        DestroyJoinedPlayerNames();
-        for(int i = 0; i < playerNames.Count; i++)
-        {
-            InstantiateJoinedPlayers(playerNames[i]);
-        }
-
         for (int i = 0;i < (GameData.playersCount - playerJoined); i++)
         {
-            InstantiateJoinedPlayers("Free Player Slot");
+            InstantiateJoinedPlayers("");
         }
 
         LoadingScreenUI.instance.StopLoading();
@@ -131,17 +166,19 @@ public class LobbyUI : MonoBehaviour
             Destroy(child.gameObject);
         }
     }
-    private void InstantiateJoinedPlayers(string name)
+    private void InstantiateJoinedPlayers(string name, bool isReady = false, bool isThisPlayerHost = false)
     {
-        GameObject obj = Instantiate(joinedPlayerPrefab, joinedPlayersContainer);
-        obj.GetComponentInChildren<TextMeshProUGUI>().text = name;
+        GameObject item = Instantiate(joinedPlayerPrefab, joinedPlayersContainer);
+        item.GetComponent<LobbyPlayerItem>().Initialize(isThisPlayerHost,name);
+
+        if (name != "")
+            item.GetComponent<LobbyPlayerItem>().SetPlayerReadyStatus(isReady);
     }
     private void InstantiateAnnoucement(string annoucement)
     {
-
-        GameObject obj = Instantiate(announcementTxtPrefab, annoucementContainer);
-        obj.GetComponent<TextMeshProUGUI>().text = annoucement;
-        StartCoroutine(DestroyAccouncement(obj));   
+        GameObject announcement = Instantiate(announcementTxtPrefab, annoucementContainer);
+        announcement.GetComponent<TextMeshProUGUI>().text = annoucement;
+        StartCoroutine(DestroyAccouncement(announcement));   
     }
     private IEnumerator DestroyAccouncement(GameObject obj)
     {
