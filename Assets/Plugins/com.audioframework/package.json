@@ -1,0 +1,23 @@
+{
+  "name": "com.audioframework",
+  "displayName": "Audio Framework",
+  "version": "0.1.0",
+  "unity": "6000.3",
+  "unityRelease": "17f1",
+  "description": "Reusable audio management framework for Unity projects",
+  "author": {
+    "name": "Sinru, Badri,& Bobby"
+  },
+  "samples": [
+    {
+      "displayName": "Demo Scene",
+      "description": "Sample scene demonstrating all Audio Framework features",
+      "path": "Samples~/Demo"
+    }
+  ],
+  "repository": {
+    "url": "https://github.com/CodeSrinu/AudioMangement-FrameWork.git",
+    "type": "git",
+    "revision": "f557ada67dedd87668d98f77913b1280d4371db1"
+  }
+}

@@ -1,0 +1,16 @@
+{
+    "name": "com.audioframework.Demo",
+    "rootNamespace": "",
+    "references": [
+        "GUID:b2d1712aae6b2b34e86d64739a48055d"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
