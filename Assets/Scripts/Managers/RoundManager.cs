@@ -47,7 +47,7 @@ public class RoundManager : NetworkBehaviour
     {
         if (IsHost) return;
 
-        LoadingScreenUI.instance.StartLoading();
+        if(GameData.isOnline) LoadingScreenUI.instance.StartLoading();
         VotingManager.instance.onPlayerEliminated += HandlePlayerEliminated;
     }
 

@@ -1,11 +1,5 @@
 {
   "dependencies": {
-    "com.audioframework": {
-      "version": "file:C:/Users/Aman/Downloads/package",
-      "depth": 0,
-      "source": "local",
-      "dependencies": {}
-    },
     "com.unity.2d.animation": {
       "version": "13.0.5",
       "depth": 1,

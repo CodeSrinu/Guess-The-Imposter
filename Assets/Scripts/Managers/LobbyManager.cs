@@ -217,6 +217,7 @@ public class LobbyManager : MonoBehaviour
             _currentLobby = null;
             StopPolling();
             NetworkManager.Singleton.Shutdown();
+            NetworkManager.Singleton.SceneManager.LoadScene("MainMenu", UnityEngine.SceneManagement.LoadSceneMode.Single);
         }
         catch(Exception e)
         {

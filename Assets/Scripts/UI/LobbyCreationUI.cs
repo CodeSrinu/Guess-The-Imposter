@@ -49,7 +49,7 @@ public class LobbyCreationUI : MonoBehaviour
             if(prevPlayerNames.Count > 0)
             {
                 InstantiateInputFields(prevPlayerNames.Count);
-                playerCountSlider.value = prevPlayerNames.Count;
+                playerCountSlider.value = prevPlayerNames.Count >= 3 ? prevPlayerNames.Count:3;
                 playerCountSliderTxt.text = prevPlayerNames.Count.ToString();
                 playersCount = prevPlayerNames.Count;
             }
@@ -120,7 +120,6 @@ public class LobbyCreationUI : MonoBehaviour
 
         startGameBtn.onClick.AddListener(() =>
         {
-            if (playerNamesContainer.GetChild(0).GetComponentInChildren<TextMeshProUGUI>().text.Trim() != "")
 
             if (LobbyManager.instance.IsOnline)
             {
@@ -128,6 +127,15 @@ public class LobbyCreationUI : MonoBehaviour
             }
             else
             {
+                foreach(Transform inputFeild in playerNamesContainer)
+                {
+                    if(inputFeild.GetComponentInChildren<TextMeshProUGUI>().text == "")
+                    {
+                        LoadingScreenUI.instance.ShowLoadingError("Must enter all player names");
+                        break;
+                    }
+                }
+
                 SaveDataToGameDataClass();
                 SavePlayerNamesTemplate();
                 SaveCategoriesTemplate();

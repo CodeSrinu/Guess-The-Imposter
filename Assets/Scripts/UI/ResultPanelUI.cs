@@ -14,8 +14,9 @@ public class ResultPanelUI : MonoBehaviour
     }
     private IEnumerator ShowResult(RoundManager.GameResult result)
     {
-        Debug.Log($"Result: {result}");
+        
         winTextComp.text = result is RoundManager.GameResult.ImpostersWon ? "Imposters Won" : "Civilians Won";
+
 
         yield return new WaitForSeconds(2f);
         if (GameData.isOnline)

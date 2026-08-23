@@ -26,7 +26,7 @@ public class LobbyUI : MonoBehaviour
     [SerializeField] private Button leaveLobbyBtn;
     [SerializeField] private Button readyBtn;
 
-    private bool isReady = false;
+    private bool isReady = PlayerPrefs.GetInt("IsReady", 0) == 1;
 
     private List<string> _prevPlayerNames = new List<string>();
 
@@ -50,6 +50,7 @@ public class LobbyUI : MonoBehaviour
         readyBtn.onClick.AddListener(() =>
         {
             isReady = !isReady;
+            PlayerPrefs.SetInt("IsReady", isReady ? 1 : 0);
             LobbyManager.instance.SetPlayerReadyStatus(isReady);
             readyBtn.GetComponentInChildren<TextMeshProUGUI>().text = isReady ? "Cancel" : "Ready";
         });
@@ -107,7 +108,11 @@ public class LobbyUI : MonoBehaviour
     private void HandleLobbyChange()
     {
         Lobby lobby = LobbyManager.instance.CurrentLobby;
-        if (lobby == null) return;
+        if (lobby == null)
+        {
+            SceneManager.LoadScene("MainMenu");
+            return;
+        };
 
         int playerJoined = lobby.Players.Count;
         string roomCode = lobby.LobbyCode;
