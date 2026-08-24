@@ -33,16 +33,4 @@ public class GameManager : NetworkBehaviour
             RoundManager.instance.StartGame();
         }
     }
-
-    //public override void OnNetworkSpawn()
-    //{
-    //    Debug.Log("OnNetworkSpawn called before !isHost");
-
-    //    if (!IsHost) return;
-    //    Debug.Log("OnNetworkSpawn called After !isHost");
-
-    //    RoundManager.instance.StartGame();
-    //}
-
-
 }

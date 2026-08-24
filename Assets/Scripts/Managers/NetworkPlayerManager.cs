@@ -28,7 +28,7 @@ public class NetworkPlayerManager : NetworkBehaviour
             return;
         }
         instance = this;
-
+        DontDestroyOnLoad(gameObject);
     }
 
     public void PopulatePlayers()
@@ -170,6 +170,13 @@ public class NetworkPlayerManager : NetworkBehaviour
             if (player.name.ToString() == playerName) return player.isEliminated;
         }
         return false;
+    }
+
+    [ClientRpc]
+    public void ForceResetReadyStatusCLientRpc()
+    {
+        if (IsHost) return;
+        LobbyManager.instance.SetPlayerReadyStatus(false);
     }
 
 }

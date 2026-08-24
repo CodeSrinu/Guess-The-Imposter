@@ -5,6 +5,7 @@ using TMPro;
 using Unity.Netcode;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -26,7 +27,7 @@ public class LobbyUI : MonoBehaviour
     [SerializeField] private Button leaveLobbyBtn;
     [SerializeField] private Button readyBtn;
 
-    private bool isReady = PlayerPrefs.GetInt("IsReady", 0) == 1;
+    private bool isReady = false;
 
     private List<string> _prevPlayerNames = new List<string>();
 
@@ -50,11 +51,12 @@ public class LobbyUI : MonoBehaviour
         readyBtn.onClick.AddListener(() =>
         {
             isReady = !isReady;
-            PlayerPrefs.SetInt("IsReady", isReady ? 1 : 0);
             LobbyManager.instance.SetPlayerReadyStatus(isReady);
             readyBtn.GetComponentInChildren<TextMeshProUGUI>().text = isReady ? "Cancel" : "Ready";
         });
+        
     }
+
 
     private void CheckAllAreReadyAndStart()
     {
@@ -73,8 +75,8 @@ public class LobbyUI : MonoBehaviour
             }
         }
         
-        if(readyCount < LobbyManager.instance.CurrentLobby.Players.Count - 1)//host is ready all the time that's why -1
-        {
+        if(readyCount < LobbyManager.instance.CurrentLobby.Players.Count) 
+        { 
             LoadingScreenUI.instance.ShowLoadingError("Not All players are Ready");
             return;
         }
@@ -88,7 +90,6 @@ public class LobbyUI : MonoBehaviour
         GameData.playersCount = LobbyManager.instance.CurrentLobby.Players.Count;
 
         LoadingScreenUI.instance.StartLoading();
-
         NetworkManager.Singleton.SceneManager.LoadScene("Game", LoadSceneMode.Single);
 
     }
@@ -98,6 +99,7 @@ public class LobbyUI : MonoBehaviour
         startBtn.gameObject.SetActive(NetworkManager.Singleton.IsHost);
         LobbyManager.instance.StartPolling();
         LobbyManager.instance.onLobbyUpdated += HandleLobbyChange;
+        LobbyManager.instance.ResetPlayerReadyStatus();
     }
 
     private void OnDestroy()

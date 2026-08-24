@@ -296,6 +296,15 @@ public class LobbyManager : MonoBehaviour
         onLobbyUpdated?.Invoke();
     }
 
+    public void ResetPlayerReadyStatus()
+    {
+        if (!NetworkManager.Singleton.IsHost) return;
+
+        NetworkPlayerManager.instance.ForceResetReadyStatusCLientRpc();
+    }
+
+
+
     public void KickPlayer(string playerName)
     {
         foreach(var player in _currentLobby.Players)
