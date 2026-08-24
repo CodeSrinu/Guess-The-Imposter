@@ -11,6 +11,7 @@ using Unity.Networking.Transport.Relay;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.SceneManagement;
 
 public class LobbyManager : MonoBehaviour
 {
@@ -257,12 +258,35 @@ public class LobbyManager : MonoBehaviour
 
     public async Task PollLobby()
     {
-        Debug.Log("Inside Poll Lobby, curent lobby = " +  _currentLobby);
         while(_currentLobby != null && _isPolling)
         {
-            await Task.Delay(1500);
-            _currentLobby = await LobbyService.Instance.GetLobbyAsync(_currentLobby.Id);
-            onLobbyUpdated?.Invoke();
+            try
+            {
+                await Task.Delay(1500);
+                _currentLobby = await LobbyService.Instance.GetLobbyAsync(_currentLobby.Id);
+                onLobbyUpdated?.Invoke();
+            }
+            catch(LobbyServiceException e)
+            {
+                if(e.Reason == LobbyExceptionReason.Forbidden)
+                {
+                    LoadingScreenUI.instance.ShowLoadingError($"You are kicked by the Host");
+                }
+                else if (e.Reason == LobbyExceptionReason.LobbyNotFound)
+                {
+                    if (NetworkManager.Singleton.IsHost) return;
+                    LoadingScreenUI.instance.ShowLoadingError("Host deleted the lobby");
+                }
+                else
+                {
+                    LoadingScreenUI.instance.ShowLoadingError($"Network Error: Lobby not found");
+                }
+                StopPolling();
+                _currentLobby = null;
+
+                await Task.Delay(2000);
+                SceneManager.LoadScene("MainMenu");
+            }
         }
     }
 
@@ -313,6 +337,7 @@ public class LobbyManager : MonoBehaviour
             {
                 LobbyService.Instance.RemovePlayerAsync(_currentLobby.Id, player.Id);
                 onLobbyUpdated?.Invoke();
+                return;
             }
         }
 

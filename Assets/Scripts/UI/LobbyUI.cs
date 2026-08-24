@@ -110,11 +110,8 @@ public class LobbyUI : MonoBehaviour
     private void HandleLobbyChange()
     {
         Lobby lobby = LobbyManager.instance.CurrentLobby;
-        if (lobby == null)
-        {
-            SceneManager.LoadScene("MainMenu");
-            return;
-        };
+
+        if (lobby == null) return;
 
         int playerJoined = lobby.Players.Count;
         string roomCode = lobby.LobbyCode;
