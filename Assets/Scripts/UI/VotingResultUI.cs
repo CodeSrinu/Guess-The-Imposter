@@ -16,7 +16,9 @@ public class VotingResultUI : MonoBehaviour
 
         _eliminatedPlayerTxtComp.text = player.name + " is Eliminated";
         _votedPlayerImposterStatusTxtComp.text = player.isImposter ? player.name + " is Imposter" : player.name + " is not Imposter";
-        _imposterRemainingTxtComp.text = RoundManager.instance.remainingImposters.ToString() + " Imposter remaining";
+        int count = RoundManager.instance.remainingImposters;
+        string label = count == 1 ? "Imposter" : "Imposters";
+        _imposterRemainingTxtComp.text = $"{count} {label} remaining";
     }
 
     public void SetTieResult()

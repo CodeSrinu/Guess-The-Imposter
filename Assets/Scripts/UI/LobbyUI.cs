@@ -29,8 +29,6 @@ public class LobbyUI : MonoBehaviour
 
     private bool isReady = false;
 
-    private List<string> _prevPlayerNames = new List<string>();
-
     private void Awake()
     {
         readyBtn.gameObject.SetActive(!NetworkManager.Singleton.IsHost);
@@ -98,13 +96,41 @@ public class LobbyUI : MonoBehaviour
     {
         startBtn.gameObject.SetActive(NetworkManager.Singleton.IsHost);
         LobbyManager.instance.StartPolling();
-        LobbyManager.instance.onLobbyUpdated += HandleLobbyChange;
         LobbyManager.instance.ResetPlayerReadyStatus();
+        LobbyManager.instance.OnLobbyUpdated += HandleLobbyChange;
+        LobbyManager.instance.OnLobbyCreation += HandleLobbyCreation;
+        LobbyManager.instance.OnPlayerJoinedLobby += HandlePlayerJoinedLobby;
+        LobbyManager.instance.OnPlayerKickedFromLobby += HandlePlayerKickedFromLobby;
+        LobbyManager.instance.OnPlayerLeftLobby += HandlePlayerLeftLobby;
+    }
+
+    private void HandlePlayerLeftLobby(string playerName)
+    {
+        InstantiateAnnoucement($"{playerName} left the lobby");
+    }
+
+    private void HandlePlayerKickedFromLobby(string kickedPlayerName)
+    {
+        InstantiateAnnoucement($"Host kicked {kickedPlayerName}");
+    }
+
+    private void HandlePlayerJoinedLobby(string joinedPlayerName)
+    {
+        InstantiateAnnoucement($"{joinedPlayerName} joined the lobby");
+    }
+
+    private void HandleLobbyCreation()
+    {
+        InstantiateAnnoucement("New Lobby Created");
     }
 
     private void OnDestroy()
     {
-        LobbyManager.instance.onLobbyUpdated -= HandleLobbyChange;
+        LobbyManager.instance.OnLobbyUpdated -= HandleLobbyChange;
+        LobbyManager.instance.OnLobbyCreation -= HandleLobbyCreation;
+        LobbyManager.instance.OnPlayerJoinedLobby -= HandlePlayerJoinedLobby;
+        LobbyManager.instance.OnPlayerKickedFromLobby -= HandlePlayerKickedFromLobby;
+        LobbyManager.instance.OnPlayerLeftLobby -= HandlePlayerLeftLobby;
     }
 
     private void HandleLobbyChange()
@@ -142,25 +168,6 @@ public class LobbyUI : MonoBehaviour
         }
 
         LoadingScreenUI.instance.StopLoading();
-
-        foreach (string p in playerNames)
-        {
-            if (!_prevPlayerNames.Contains(p))
-            {
-                InstantiateAnnoucement(p + " joined the lobby");
-            }
-        }
-
-        foreach(string p in _prevPlayerNames)
-        {
-            if (!playerNames.Contains(p))
-            {
-                InstantiateAnnoucement(p + " left the lobby");
-            }
-        }
-
-
-        _prevPlayerNames = new List<string>(playerNames);
     }
 
     private void DestroyJoinedPlayerNames()
@@ -189,6 +196,7 @@ public class LobbyUI : MonoBehaviour
         yield return new WaitForSeconds(2);
         Destroy(obj);
     }
+
 
     private async Task LeaveLobbyFlow()
     {

@@ -46,17 +46,13 @@ public class LobbyCreationUI : MonoBehaviour
         {
             string namesString = PlayerPrefs.GetString("PlayerNamesTemplate", "");
             List<string> prevPlayerNames = namesString.Split(",").ToList();
-            if(prevPlayerNames.Count > 0)
-            {
-                InstantiateInputFields(prevPlayerNames.Count);
-                playerCountSlider.value = prevPlayerNames.Count >= 3 ? prevPlayerNames.Count:3;
-                playerCountSliderTxt.text = prevPlayerNames.Count.ToString();
-                playersCount = prevPlayerNames.Count;
-            }
-            else
-            {
-                InstantiateInputFields(playersCount);
-            }
+            int minPlayers = prevPlayerNames.Count >= 3 ? prevPlayerNames.Count : 3;
+
+            InstantiateInputFields(minPlayers);
+            playerCountSlider.value = minPlayers;
+            playerCountSliderTxt.text = minPlayers.ToString();
+            playersCount = minPlayers;
+
             SetThePlayerNamesTemplate();
         }
         categoriesPanel.GetComponent<CategoryPanelUI>().PopulateCategories();

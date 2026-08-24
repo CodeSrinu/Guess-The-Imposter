@@ -20,7 +20,11 @@ public class LobbyManager : MonoBehaviour
 
     private Lobby _currentLobby;
 
-    public event Action onLobbyUpdated;
+    public event Action OnLobbyUpdated;
+    public event Action<string> OnPlayerJoinedLobby;
+    public event Action<string> OnPlayerLeftLobby;
+    public event Action<string> OnPlayerKickedFromLobby;
+    public event Action OnLobbyCreation;
     public Lobby CurrentLobby  => _currentLobby;
     private bool _isPolling = false;
     public bool IsOnline
@@ -122,7 +126,7 @@ public class LobbyManager : MonoBehaviour
             _currentLobby = await LobbyService.Instance.CreateLobbyAsync(hostName, GameData.playersCount, lobbyOptions);
 
             StartHeartBeat();
-            
+            OnLobbyCreation?.Invoke();
             return null;
         }
         catch(LobbyServiceException e)
@@ -158,6 +162,7 @@ public class LobbyManager : MonoBehaviour
 
     public async Task<bool> JoinLobby(string roomCode, string playerName)
     {
+        bool isJoined = false;
         try
         {
             Dictionary<string, PlayerDataObject> clientPlayerData = new Dictionary<string, PlayerDataObject> {
@@ -170,7 +175,7 @@ public class LobbyManager : MonoBehaviour
             };
 
             _currentLobby = await LobbyService.Instance.JoinLobbyByCodeAsync(roomCode, joinLobbyByCodeOptions);
-
+            isJoined = true;
             string relayJoinCode = _currentLobby.Data["RelayJoinCode"].Value;
             JoinAllocation joinAllocation = await RelayService.Instance.JoinAllocationAsync(relayJoinCode);
 
@@ -192,11 +197,17 @@ public class LobbyManager : MonoBehaviour
             GameData.canImposterHaveWord = bool.Parse(_currentLobby.Data["CanImposterHaveWord"].Value);
             GameData.playersCount = int.Parse(_currentLobby.Data["PlayersCount"].Value);
 
-
+            OnPlayerJoinedLobby?.Invoke(playerName);
             return true;
         }
         catch (Exception e)
         {
+            if (isJoined)
+            {
+                await LobbyService.Instance.RemovePlayerAsync(_currentLobby.Id, AuthenticationService.Instance.PlayerId);
+                LoadingScreenUI.instance.ShowLoadingError("Network Error: Lobby joining failed, try again");
+                _currentLobby = null;
+            }
             Debug.LogError("Lobby Joning failed: " + e.Message);
             return false;
         }
@@ -219,6 +230,7 @@ public class LobbyManager : MonoBehaviour
             StopPolling();
             NetworkManager.Singleton.Shutdown();
             NetworkManager.Singleton.SceneManager.LoadScene("MainMenu", UnityEngine.SceneManagement.LoadSceneMode.Single);
+            OnPlayerLeftLobby?.Invoke(GameData.devicePlayerName);
         }
         catch(Exception e)
         {
@@ -264,22 +276,26 @@ public class LobbyManager : MonoBehaviour
             {
                 await Task.Delay(1500);
                 _currentLobby = await LobbyService.Instance.GetLobbyAsync(_currentLobby.Id);
-                onLobbyUpdated?.Invoke();
+                OnLobbyUpdated?.Invoke();
             }
             catch(LobbyServiceException e)
             {
-                if(e.Reason == LobbyExceptionReason.Forbidden)
+                if (e.Reason == LobbyExceptionReason.Forbidden)
                 {
                     LoadingScreenUI.instance.ShowLoadingError($"You are kicked by the Host");
                 }
-                else if (e.Reason == LobbyExceptionReason.LobbyNotFound)
+                else if (e.Reason == LobbyExceptionReason.LobbyNotFound && !NetworkManager.Singleton.IsHost)
                 {
-                    if (NetworkManager.Singleton.IsHost) return;
                     LoadingScreenUI.instance.ShowLoadingError("Host deleted the lobby");
+                }
+                else if(e.Reason == LobbyExceptionReason.Unknown)
+                {
+                    LoadingScreenUI.instance.ShowLoadingError("Something Went Wrong");
+                    return;
                 }
                 else
                 {
-                    LoadingScreenUI.instance.ShowLoadingError($"Network Error: Lobby not found");
+                    LoadingScreenUI.instance.ShowLoadingError($"Network Error: Lobby Not Found");
                 }
                 StopPolling();
                 _currentLobby = null;
@@ -317,7 +333,7 @@ public class LobbyManager : MonoBehaviour
             AuthenticationService.Instance.PlayerId,
             updatePlayerOptions
         );
-        onLobbyUpdated?.Invoke();
+        OnLobbyUpdated?.Invoke();
     }
 
     public void ResetPlayerReadyStatus()
@@ -336,7 +352,8 @@ public class LobbyManager : MonoBehaviour
             if (player.Data.TryGetValue("PlayerName", out var nameData) && nameData.Value == playerName)
             {
                 LobbyService.Instance.RemovePlayerAsync(_currentLobby.Id, player.Id);
-                onLobbyUpdated?.Invoke();
+                OnPlayerKickedFromLobby?.Invoke(playerName);
+                OnLobbyUpdated?.Invoke();
                 return;
             }
         }

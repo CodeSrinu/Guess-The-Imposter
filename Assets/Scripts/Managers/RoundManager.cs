@@ -45,19 +45,21 @@ public class RoundManager : NetworkBehaviour
 
     private void Start()
     {
-        if (IsHost) return;
-
-        if(GameData.isOnline) LoadingScreenUI.instance.StartLoading();
         VotingManager.instance.onPlayerEliminated += HandlePlayerEliminated;
+        Debug.Log("[CLIENT] RoundManager subscribed to elimination event!");
+        if (GameData.isOnline) LoadingScreenUI.instance.StartLoading();
+
+        //if (!IsHost) return;
     }
 
-    private void HandlePlayerEliminated(Player player)
+    private void HandlePlayerEliminated(Player eliminatedPlayer)
     {
-        if(player == null) return;
+        if(eliminatedPlayer == null) return;
 
-        if (player.isImposter)
+        if (eliminatedPlayer.isImposter)
         {
-            _remianingImposters.Value--; 
+            Debug.Log($"{_remianingImposters.Value} imposters count");
+            //_remianingImposters.Value--;
         }
     }
 

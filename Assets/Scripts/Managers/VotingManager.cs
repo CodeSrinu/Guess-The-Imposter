@@ -243,17 +243,17 @@ public class VotingManager : NetworkBehaviour
     [ClientRpc]
     public void BroadCastEliminationClientRpc(string playerName)
     {
-        if(playerName == "")
+        Debug.Log($"[CLIENT] RPC Received! Trying to eliminate: {playerName}");
+
+        Player player = PlayerManager.instance.GetPlayers.Find(p => p.name == playerName);
+
+        if (player == null)
         {
-            onPlayerEliminated?.Invoke(null);
+            Debug.LogError($"[CLIENT] Player {playerName} NOT FOUND in PlayerManager!");
             return;
         }
 
-        Player player = PlayerManager.instance.GetPlayers.Find(p => p.name == playerName);  
-
-        if (player == null)
-            return;
-
+        Debug.Log($"[CLIENT] Player found! Invoking event...");
         player.isEliminated = true;
         onPlayerEliminated?.Invoke(player);
     }
