@@ -26,6 +26,8 @@ public class LobbyUI : MonoBehaviour
     [SerializeField] private Button startBtn;
     [SerializeField] private Button leaveLobbyBtn;
     [SerializeField] private Button readyBtn;
+    [SerializeField] private AnnoucementManager _annoucementManager;
+    [SerializeField] private LobbyPlayersUIManager _lobbyPlayerUIManager;
 
     private bool isReady = false;
 
@@ -102,26 +104,29 @@ public class LobbyUI : MonoBehaviour
         LobbyManager.instance.OnPlayerJoinedLobby += HandlePlayerJoinedLobby;
         LobbyManager.instance.OnPlayerKickedFromLobby += HandlePlayerKickedFromLobby;
         LobbyManager.instance.OnPlayerLeftLobby += HandlePlayerLeftLobby;
+
+        //_annoucementManager = FindAnyObjectByType<AnnoucementManager>();
+        //_lobbyPlayerUIManager = FindAnyObjectByType<LobbyPlayersUIManager>();
     }
 
     private void HandlePlayerLeftLobby(string playerName)
     {
-        InstantiateAnnoucement($"{playerName} left the lobby");
+        _annoucementManager.GiveAnnoucement($"{playerName} left the lobby");
     }
 
     private void HandlePlayerKickedFromLobby(string kickedPlayerName)
     {
-        InstantiateAnnoucement($"Host kicked {kickedPlayerName}");
+        _annoucementManager.GiveAnnoucement($"Host kicked {kickedPlayerName}");
     }
 
     private void HandlePlayerJoinedLobby(string joinedPlayerName)
     {
-        InstantiateAnnoucement($"{joinedPlayerName} joined the lobby");
+        _annoucementManager.GiveAnnoucement($"{joinedPlayerName} joined the lobby");
     }
 
     private void HandleLobbyCreation()
     {
-        InstantiateAnnoucement("New Lobby Created");
+        _annoucementManager.GiveAnnoucement("New Lobby Created");
     }
 
     private void OnDestroy()
@@ -143,7 +148,7 @@ public class LobbyUI : MonoBehaviour
         string roomCode = lobby.LobbyCode;
         List<string> playerNames = new List<string>();
 
-        DestroyJoinedPlayerNames();
+        //DestroyJoinedPlayerNames();
         foreach (var player in  lobby.Players)
         {
             string name = player.Data.TryGetValue("PlayerName",out var nameData) ? nameData.Value : "Free Player Slot";
@@ -155,7 +160,8 @@ public class LobbyUI : MonoBehaviour
             }
 
             playerNames.Add(name);
-            InstantiateJoinedPlayers(name, isReady, isThisPlayerHost);
+            //InstantiateJoinedPlayers(name, isReady, isThisPlayerHost);
+            _lobbyPlayerUIManager.AddPlayerItem(name, isReady, isThisPlayerHost);
         }
 
         playersJoinedTxtComp.text = "Players Joined: " + playerJoined.ToString();
@@ -164,38 +170,36 @@ public class LobbyUI : MonoBehaviour
 
         for (int i = 0;i < (GameData.playersCount - playerJoined); i++)
         {
-            InstantiateJoinedPlayers("");
+            //InstantiateJoinedPlayers("");
+            _lobbyPlayerUIManager.AddPlayerItem("", false, false);
         }
 
         LoadingScreenUI.instance.StopLoading();
     }
 
-    private void DestroyJoinedPlayerNames()
-    {
-        foreach(Transform child in joinedPlayersContainer.transform)
-        {
-            Destroy(child.gameObject);
-        }
-    }
-    private void InstantiateJoinedPlayers(string name, bool isReady = false, bool isThisPlayerHost = false)
-    {
-        GameObject item = Instantiate(joinedPlayerPrefab, joinedPlayersContainer);
-        item.GetComponent<LobbyPlayerItem>().Initialize(isThisPlayerHost,name);
-
-        if (name != "")
-            item.GetComponent<LobbyPlayerItem>().SetPlayerReadyStatus(isReady);
-    }
-    private void InstantiateAnnoucement(string annoucement)
-    {
-        GameObject announcement = Instantiate(announcementTxtPrefab, annoucementContainer);
-        announcement.GetComponent<TextMeshProUGUI>().text = annoucement;
-        StartCoroutine(DestroyAccouncement(announcement));   
-    }
-    private IEnumerator DestroyAccouncement(GameObject obj)
-    {
-        yield return new WaitForSeconds(2);
-        Destroy(obj);
-    }
+    //private void DestroyJoinedPlayerNames()
+    //{
+    //    foreach(Transform child in joinedPlayersContainer.transform)
+    //    {
+    //        Destroy(child.gameObject);
+    //    }
+    //}
+    //private void InstantiateJoinedPlayers(string name, bool isReady = false, bool isThisPlayerHost = false)
+    //{
+    //    GameObject item = Instantiate(joinedPlayerPrefab, joinedPlayersContainer);
+        
+    //}
+    //private void InstantiateAnnoucement(string annoucement)
+    //{
+    //    GameObject announcement = Instantiate(announcementTxtPrefab, annoucementContainer);
+    //    announcement.GetComponent<TextMeshProUGUI>().text = annoucement;
+    //    StartCoroutine(DestroyAccouncement(announcement));   
+    //}
+    //private IEnumerator DestroyAccouncement(GameObject obj)
+    //{
+    //    yield return new WaitForSeconds(2);
+    //    Destroy(obj);
+    //}
 
 
     private async Task LeaveLobbyFlow()

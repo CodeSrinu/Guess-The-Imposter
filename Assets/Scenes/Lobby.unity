@@ -1146,6 +1146,7 @@ GameObject:
   - component: {fileID: 1140924254}
   - component: {fileID: 1140924253}
   - component: {fileID: 1140924252}
+  - component: {fileID: 1140924255}
   m_Layer: 5
   m_Name: JoinedPlayersContainer
   m_TagString: Untagged
@@ -1236,6 +1237,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1140924250}
   m_CullTransparentMesh: 1
+--- !u!114 &1140924255
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1140924250}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 244a816ba10d9204a8a2ef6092f20b94, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LobbyPlayersUIManager
+  lobbyPlayerUIPrefab: {fileID: 2818836188640906399, guid: 40bb7f5ba3a06754ebe499c7d0964018, type: 3}
 --- !u!1 &1162004645
 GameObject:
   m_ObjectHideFlags: 0
@@ -1339,6 +1353,8 @@ MonoBehaviour:
   startBtn: {fileID: 357067879}
   leaveLobbyBtn: {fileID: 2117939310}
   readyBtn: {fileID: 726011874}
+  _annoucementManager: {fileID: 1176870164}
+  _lobbyPlayerUIManager: {fileID: 0}
 --- !u!1 &1176870161
 GameObject:
   m_ObjectHideFlags: 0
@@ -1349,6 +1365,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1176870162}
   - component: {fileID: 1176870163}
+  - component: {fileID: 1176870164}
   m_Layer: 5
   m_Name: Annoucements Conatiner
   m_TagString: Untagged
@@ -1401,6 +1418,19 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &1176870164
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1176870161}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90e450fbd2ec03547bc9ec89e50a9995, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AnnoucementManager
+  annoucementPrefab: {fileID: 1417015755610408850, guid: 7bb930d4ee9dd6744b4caf9a201fba9a, type: 3}
 --- !u!1 &1503956180
 GameObject:
   m_ObjectHideFlags: 0

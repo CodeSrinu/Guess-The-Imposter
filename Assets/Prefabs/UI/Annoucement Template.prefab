@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 832761249243086789}
   - component: {fileID: 2597614879324963024}
   m_Layer: 5
-  m_Name: Annoucement Txt
+  m_Name: Annoucement Template
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
