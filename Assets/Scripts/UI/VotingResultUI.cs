@@ -9,16 +9,15 @@ public class VotingResultUI : MonoBehaviour
 
 
 
-    public void SetVotingResultPanel(Player player)
+    public void SetVotingResultPanel(Player player, bool wasImposter, int remainingImpostersCount)
     {
         _eliminatedPlayerTxtComp.gameObject.SetActive(true);
         _imposterRemainingTxtComp.gameObject.SetActive(true);
 
         _eliminatedPlayerTxtComp.text = player.name + " is Eliminated";
-        _votedPlayerImposterStatusTxtComp.text = player.isImposter ? player.name + " is Imposter" : player.name + " is not Imposter";
-        int count = RoundManager.instance.remainingImposters;
-        string label = count == 1 ? "Imposter" : "Imposters";
-        _imposterRemainingTxtComp.text = $"{count} {label} remaining";
+        _votedPlayerImposterStatusTxtComp.text = wasImposter ? player.name + " is Imposter" : player.name + " is not Imposter";
+        string label = remainingImpostersCount == 1 ? "Imposter" : "Imposters";
+        _imposterRemainingTxtComp.text = $"{remainingImpostersCount} {label} remaining";
     }
 
     public void SetTieResult()

@@ -5,6 +5,7 @@ using System.Linq;
 using TMPro;
 using Unity.Netcode;
 using UnityEngine;
+using static UnityEngine.LowLevelPhysics2D.PhysicsLayers;
 
 
 public class VotingManager : NetworkBehaviour
@@ -13,7 +14,7 @@ public class VotingManager : NetworkBehaviour
     private int _votesCount = 0;
     private int _skipVoteCount = 0;
 
-    public event Action<Player> onPlayerEliminated;
+    public event Action<Player, bool, int> onPlayerEliminated;
 
     public static VotingManager instance;
 
@@ -133,7 +134,7 @@ public class VotingManager : NetworkBehaviour
             ResetVotes();
             if(GameData.isOnline)
             {
-                onPlayerEliminated?.Invoke(null);
+                onPlayerEliminated?.Invoke(null, false, 0);
                 BroadCastEliminationClientRpc("");
                 RoundManager.instance.StartClueAfterVote();
                 return;
@@ -154,7 +155,7 @@ public class VotingManager : NetworkBehaviour
             ResetVotes();
             if (!GameData.isOnline)
             {
-                onPlayerEliminated?.Invoke(null);
+                onPlayerEliminated?.Invoke(null, false, 0);
             }
             BroadCastEliminationClientRpc("");
             RoundManager.instance.StartClueAfterVote();
@@ -165,7 +166,7 @@ public class VotingManager : NetworkBehaviour
             highestVotedPlayer.isEliminated = true;
             if(!GameData.isOnline)
             {
-                onPlayerEliminated?.Invoke(highestVotedPlayer);
+                onPlayerEliminated?.Invoke(highestVotedPlayer, true, 0);
             }
             
             StartCoroutine(FinishVoting(highestVotedPlayer.name));
@@ -185,9 +186,11 @@ public class VotingManager : NetworkBehaviour
 
     public IEnumerator FinishVoting(string name)
     {
-        BroadCastEliminationClientRpc(name);
+        Player player = PlayerManager.instance.GetPlayers.Find(p => p.name == name);
+        RoundManager.instance.DecrementImposterCount();
+        BroadCastEliminationClientRpc(name, player.isImposter, RoundManager.instance.remainingImposters);
 
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(4f);
 
         RoundManager.GameResult result = RoundManager.instance.CheckWhoWon();
 
@@ -241,7 +244,7 @@ public class VotingManager : NetworkBehaviour
 
     }
     [ClientRpc]
-    public void BroadCastEliminationClientRpc(string playerName)
+    public void BroadCastEliminationClientRpc(string playerName, bool wasImposter = false, int remainingImposters = 0)
     {
         Debug.Log($"[CLIENT] RPC Received! Trying to eliminate: {playerName}");
 
@@ -255,6 +258,6 @@ public class VotingManager : NetworkBehaviour
 
         Debug.Log($"[CLIENT] Player found! Invoking event...");
         player.isEliminated = true;
-        onPlayerEliminated?.Invoke(player);
+        onPlayerEliminated?.Invoke(player, wasImposter, remainingImposters);
     }
 }

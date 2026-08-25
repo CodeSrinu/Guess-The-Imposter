@@ -82,7 +82,7 @@ public class UIManager : MonoBehaviour
 
     }
 
-    public void HandlePlayerEliminated(Player player)
+    public void HandlePlayerEliminated(Player player, bool wasImposter, int remainingImposters)
     {
         votingResultPanel.SetActive(true);
 
@@ -93,7 +93,7 @@ public class UIManager : MonoBehaviour
         }
         else
         {
-            votingResultPanelScript.SetVotingResultPanel(player);
+            votingResultPanelScript.SetVotingResultPanel(player, wasImposter, remainingImposters);
         }
 
         VotingPanelUI votingPanelScript = votingPanel.GetComponent<VotingPanelUI>();
