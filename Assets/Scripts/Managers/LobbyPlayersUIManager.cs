@@ -10,6 +10,7 @@ public class LobbyPlayersUIManager : MonoBehaviour
     private GameObject[] _pool;
     [SerializeField] private GameObject lobbyPlayerUIPrefab;
     private Transform lobbyPlayersUIContainer;
+    private int _poolIndex = 0;
 
     private void Start()
     {
@@ -26,7 +27,8 @@ public class LobbyPlayersUIManager : MonoBehaviour
     {
         GameObject lobbyPlayerItem = Instantiate(lobbyPlayerUIPrefab, lobbyPlayersUIContainer);
         lobbyPlayerItem.SetActive(false);
-        _pool.Append(lobbyPlayerItem);
+        _pool[_poolIndex] = lobbyPlayerItem;
+        _poolIndex++;
         return lobbyPlayerItem;
     }
 
@@ -47,7 +49,7 @@ public class LobbyPlayersUIManager : MonoBehaviour
         if (name != "")
             playerItem.GetComponent<LobbyPlayerItem>().SetPlayerReadyStatus(isReady);
         playerItem.SetActive(true);
-        StartCoroutine(RemovePlayerItem(playerItem));
+        
     }
 
     private IEnumerator RemovePlayerItem(GameObject annoucementItem)

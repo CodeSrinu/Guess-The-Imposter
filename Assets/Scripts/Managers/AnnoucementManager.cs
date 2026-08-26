@@ -9,6 +9,7 @@ public class AnnoucementManager : MonoBehaviour
     private GameObject[] _pool;
     [SerializeField] private GameObject annoucementPrefab;
     private Transform announcementsContainer;
+    private int _poolIndex = 0;
 
     private void Start()
     {
@@ -23,9 +24,12 @@ public class AnnoucementManager : MonoBehaviour
 
     private GameObject CreateAnnoucementItem()
     {
+        if(_poolIndex >= poolSize) return null;
+
         GameObject annoucementItem = Instantiate(annoucementPrefab, announcementsContainer);
         annoucementItem.SetActive(false);
-        _pool.Append(annoucementItem);
+        _pool[_poolIndex] = annoucementItem;
+        _poolIndex++;
         return annoucementItem;
     }
 

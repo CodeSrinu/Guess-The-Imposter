@@ -5,7 +5,6 @@ using TMPro;
 using Unity.Netcode;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -107,6 +106,8 @@ public class LobbyUI : MonoBehaviour
 
         //_annoucementManager = FindAnyObjectByType<AnnoucementManager>();
         //_lobbyPlayerUIManager = FindAnyObjectByType<LobbyPlayersUIManager>();
+
+        
     }
 
     private void HandlePlayerLeftLobby(string playerName)
@@ -122,6 +123,7 @@ public class LobbyUI : MonoBehaviour
     private void HandlePlayerJoinedLobby(string joinedPlayerName)
     {
         _annoucementManager.GiveAnnoucement($"{joinedPlayerName} joined the lobby");
+        _lobbyPlayerUIManager.AddPlayerItem(joinedPlayerName,false,false);
     }
 
     private void HandleLobbyCreation()
