@@ -13,7 +13,7 @@ public class AnnoucementManager : MonoBehaviour
 
     private void Start()
     {
-        _pool = new GameObject[poolSize];
+        _pool = new GameObject[poolSize + 5];
         announcementsContainer = GetComponent<Transform>();
 
         for (int i = 0; i < poolSize; i++)
@@ -44,6 +44,7 @@ public class AnnoucementManager : MonoBehaviour
 
     public void GiveAnnoucement(string annoucementTxt)
     {
+        Debug.Log($"AnnoucementManager: GiveAnnoucement is triggered with text:{annoucementTxt}");
         GameObject annoucementItem = GetFreeAnnoucementItem();
         annoucementItem.GetComponent<TextMeshProUGUI>().text = annoucementTxt;
         annoucementItem.SetActive(true);
@@ -52,6 +53,7 @@ public class AnnoucementManager : MonoBehaviour
 
     private IEnumerator RemoveAnnoucement(GameObject annoucementItem)
     {
+        Debug.Log($"AnnoucementManager: RemoveAnnoucement is triggered with item:{annoucementItem.GetComponent<TextMeshProUGUI>().text}");
         yield return new WaitForSeconds(2f);
         annoucementItem.SetActive(false);
     }

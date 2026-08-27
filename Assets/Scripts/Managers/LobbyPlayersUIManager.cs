@@ -32,7 +32,7 @@ public class LobbyPlayersUIManager : MonoBehaviour
         return lobbyPlayerItem;
     }
 
-    private GameObject GetFreeAnnoucementItem()
+    private GameObject GetLobbyPlayerItem()
     {
         foreach (GameObject item in _pool)
         {
@@ -43,7 +43,7 @@ public class LobbyPlayersUIManager : MonoBehaviour
 
     public void AddPlayerItem(string name, bool isReady = false, bool isThisPlayerHost = false)
     {
-        GameObject playerItem = GetFreeAnnoucementItem();
+        GameObject playerItem = GetLobbyPlayerItem();
         playerItem.GetComponent<LobbyPlayerItem>().Initialize(isThisPlayerHost, name);
 
         if (name != "")
@@ -52,10 +52,12 @@ public class LobbyPlayersUIManager : MonoBehaviour
         
     }
 
-    private IEnumerator RemovePlayerItem(GameObject annoucementItem)
+    public void ClearAllPlayerItems()
     {
-        yield return new WaitForSeconds(2f);
-        annoucementItem.SetActive(false);
+        foreach(GameObject item in _pool)
+        {
+            if(item != null) item.SetActive(false);
+        }
     }
 }
 

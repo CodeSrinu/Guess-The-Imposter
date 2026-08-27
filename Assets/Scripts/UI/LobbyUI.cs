@@ -5,6 +5,7 @@ using TMPro;
 using Unity.Netcode;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -27,6 +28,8 @@ public class LobbyUI : MonoBehaviour
     [SerializeField] private Button readyBtn;
     [SerializeField] private AnnoucementManager _annoucementManager;
     [SerializeField] private LobbyPlayersUIManager _lobbyPlayerUIManager;
+    private Dictionary<string, string> previousPlayersDict = new Dictionary<string, string>();
+    private Dictionary<string, string> kickedPlayersDict = new Dictionary<string, string>();
 
     private bool isReady = false;
 
@@ -99,45 +102,21 @@ public class LobbyUI : MonoBehaviour
         LobbyManager.instance.StartPolling();
         LobbyManager.instance.ResetPlayerReadyStatus();
         LobbyManager.instance.OnLobbyUpdated += HandleLobbyChange;
-        LobbyManager.instance.OnLobbyCreation += HandleLobbyCreation;
-        LobbyManager.instance.OnPlayerJoinedLobby += HandlePlayerJoinedLobby;
         LobbyManager.instance.OnPlayerKickedFromLobby += HandlePlayerKickedFromLobby;
-        LobbyManager.instance.OnPlayerLeftLobby += HandlePlayerLeftLobby;
-
-        //_annoucementManager = FindAnyObjectByType<AnnoucementManager>();
-        //_lobbyPlayerUIManager = FindAnyObjectByType<LobbyPlayersUIManager>();
-
-        
     }
 
-    private void HandlePlayerLeftLobby(string playerName)
-    {
-        _annoucementManager.GiveAnnoucement($"{playerName} left the lobby");
-    }
 
-    private void HandlePlayerKickedFromLobby(string kickedPlayerName)
+    private void HandlePlayerKickedFromLobby(string playerId,string kickedPlayerName)
     {
-        _annoucementManager.GiveAnnoucement($"Host kicked {kickedPlayerName}");
-    }
-
-    private void HandlePlayerJoinedLobby(string joinedPlayerName)
-    {
-        _annoucementManager.GiveAnnoucement($"{joinedPlayerName} joined the lobby");
-        _lobbyPlayerUIManager.AddPlayerItem(joinedPlayerName,false,false);
-    }
-
-    private void HandleLobbyCreation()
-    {
-        _annoucementManager.GiveAnnoucement("New Lobby Created");
+        _annoucementManager.GiveAnnoucement($"{LobbyManager.instance.GetNameById(LobbyManager.instance.CurrentLobby.HostId)} kicked {kickedPlayerName}");
+        kickedPlayersDict[playerId] = kickedPlayerName;
     }
 
     private void OnDestroy()
     {
         LobbyManager.instance.OnLobbyUpdated -= HandleLobbyChange;
-        LobbyManager.instance.OnLobbyCreation -= HandleLobbyCreation;
-        LobbyManager.instance.OnPlayerJoinedLobby -= HandlePlayerJoinedLobby;
         LobbyManager.instance.OnPlayerKickedFromLobby -= HandlePlayerKickedFromLobby;
-        LobbyManager.instance.OnPlayerLeftLobby -= HandlePlayerLeftLobby;
+        previousPlayersDict.Clear();
     }
 
     private void HandleLobbyChange()
@@ -146,11 +125,9 @@ public class LobbyUI : MonoBehaviour
 
         if (lobby == null) return;
 
-        int playerJoined = lobby.Players.Count;
-        string roomCode = lobby.LobbyCode;
-        List<string> playerNames = new List<string>();
+        Dictionary<string,string> currentPlayersDict = new Dictionary<string,string>();
 
-        //DestroyJoinedPlayerNames();
+        _lobbyPlayerUIManager.ClearAllPlayerItems();
         foreach (var player in  lobby.Players)
         {
             string name = player.Data.TryGetValue("PlayerName",out var nameData) ? nameData.Value : "Free Player Slot";
@@ -160,53 +137,46 @@ public class LobbyUI : MonoBehaviour
             {
                 isReady = readyData.Value.ToLower() == "true";                                                  
             }
-
-            playerNames.Add(name);
-            //InstantiateJoinedPlayers(name, isReady, isThisPlayerHost);
+            currentPlayersDict.Add(player.Id, name);
             _lobbyPlayerUIManager.AddPlayerItem(name, isReady, isThisPlayerHost);
         }
 
+        foreach(var playerId in currentPlayersDict.Keys)
+        {
+            if (!previousPlayersDict.ContainsKey(playerId))
+            {
+                _annoucementManager.GiveAnnoucement($"{currentPlayersDict[playerId]} is Joined the lobby");
+            }
+        }
+        foreach(var playerId in previousPlayersDict.Keys)
+        {
+            if (!currentPlayersDict.ContainsKey(playerId))
+            {
+                if(!kickedPlayersDict.ContainsKey(playerId))
+                    _annoucementManager.GiveAnnoucement($"{previousPlayersDict[playerId]} is Left the lobby");
+                else
+                    kickedPlayersDict.Remove(playerId);
+            }
+        }
+
+        //lobby data
+        int playerJoined = lobby.Players.Count;
+        string roomCode = lobby.LobbyCode;
         playersJoinedTxtComp.text = "Players Joined: " + playerJoined.ToString();
         roomCodeTxtComp.text = "Room Code: "+ roomCode;
         remainiingSlotsTxtComp.text =  "Slots Remaining: " + (GameData.playersCount - playerJoined);
 
         for (int i = 0;i < (GameData.playersCount - playerJoined); i++)
         {
-            //InstantiateJoinedPlayers("");
             _lobbyPlayerUIManager.AddPlayerItem("", false, false);
         }
-
+        previousPlayersDict = new Dictionary<string, string>(currentPlayersDict);
         LoadingScreenUI.instance.StopLoading();
     }
-
-    //private void DestroyJoinedPlayerNames()
-    //{
-    //    foreach(Transform child in joinedPlayersContainer.transform)
-    //    {
-    //        Destroy(child.gameObject);
-    //    }
-    //}
-    //private void InstantiateJoinedPlayers(string name, bool isReady = false, bool isThisPlayerHost = false)
-    //{
-    //    GameObject item = Instantiate(joinedPlayerPrefab, joinedPlayersContainer);
-        
-    //}
-    //private void InstantiateAnnoucement(string annoucement)
-    //{
-    //    GameObject announcement = Instantiate(announcementTxtPrefab, annoucementContainer);
-    //    announcement.GetComponent<TextMeshProUGUI>().text = annoucement;
-    //    StartCoroutine(DestroyAccouncement(announcement));   
-    //}
-    //private IEnumerator DestroyAccouncement(GameObject obj)
-    //{
-    //    yield return new WaitForSeconds(2);
-    //    Destroy(obj);
-    //}
-
-
     private async Task LeaveLobbyFlow()
     {
         await LobbyManager.instance.LeaveLobby();
         SceneManager.LoadScene("MainMenu");
     }
+    
 }

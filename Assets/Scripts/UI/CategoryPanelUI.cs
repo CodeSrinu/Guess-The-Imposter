@@ -60,7 +60,6 @@ public class CategoryPanelUI : MonoBehaviour
                 WordManager.instance.AddCategory(category);
 
             btnScript.ChangeTheBtnStatus(btnScript.isSelected);
-
             obj.GetComponentInChildren<TextMeshProUGUI>().text = category;
         }
     }

@@ -20,6 +20,7 @@ public class LobbyPlayerItem : MonoBehaviour
         bool canKick = NetworkManager.Singleton.IsHost && !isThisPlayerItemHost && playerName != "";
         nameTxtComp.text = playerName == "" ? "Free Player Slot": playerName;
         kickBtn.gameObject.SetActive(canKick);
+        kickBtn.onClick.RemoveAllListeners();
         kickBtn.onClick.AddListener(() =>
         {
             LobbyManager.instance.KickPlayer(playerName);

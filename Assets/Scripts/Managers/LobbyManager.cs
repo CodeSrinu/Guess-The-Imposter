@@ -1,19 +1,20 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Unity.Netcode;
+using Unity.Netcode.Transports.UTP;
+using Unity.Networking.Transport.Relay;
 using Unity.Services.Authentication;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
-using Unity.Netcode;
-using Unity.Netcode.Transports.UTP;
 using UnityEngine;
-using System.Threading.Tasks;
-using Unity.Networking.Transport.Relay;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine.SceneManagement;
+using static UnityEngine.LowLevelPhysics2D.PhysicsLayers;
 
-public class LobbyManager : MonoBehaviour
+public class LobbyManager : NetworkBehaviour
 {
     public static LobbyManager instance;
     private bool _isOnline = false;
@@ -21,10 +22,8 @@ public class LobbyManager : MonoBehaviour
     private Lobby _currentLobby;
 
     public event Action OnLobbyUpdated;
-    public event Action<string> OnPlayerJoinedLobby;
-    public event Action<string> OnPlayerLeftLobby;
-    public event Action<string> OnPlayerKickedFromLobby;
-    public event Action OnLobbyCreation;
+    public event Action<string, string> OnPlayerKickedFromLobby;
+
     public Lobby CurrentLobby  => _currentLobby;
     private bool _isPolling = false;
     public bool IsOnline
@@ -126,7 +125,6 @@ public class LobbyManager : MonoBehaviour
             _currentLobby = await LobbyService.Instance.CreateLobbyAsync(hostName, GameData.playersCount, lobbyOptions);
 
             StartHeartBeat();
-            OnLobbyCreation?.Invoke();
             return null;
         }
         catch(LobbyServiceException e)
@@ -197,7 +195,6 @@ public class LobbyManager : MonoBehaviour
             GameData.canImposterHaveWord = bool.Parse(_currentLobby.Data["CanImposterHaveWord"].Value);
             GameData.playersCount = int.Parse(_currentLobby.Data["PlayersCount"].Value);
 
-            OnPlayerJoinedLobby?.Invoke(playerName);
             return true;
         }
         catch (Exception e)
@@ -230,11 +227,11 @@ public class LobbyManager : MonoBehaviour
             StopPolling();
             NetworkManager.Singleton.Shutdown();
             NetworkManager.Singleton.SceneManager.LoadScene("MainMenu", UnityEngine.SceneManagement.LoadSceneMode.Single);
-            OnPlayerLeftLobby?.Invoke(GameData.devicePlayerName);
         }
         catch(Exception e)
         {
             Debug.LogError("Leave lobby failed: "+ e.Message);
+            LoadingScreenUI.instance.ShowLoadingError("Exit Lobby failed, Try again");
         }
     }
 
@@ -282,7 +279,7 @@ public class LobbyManager : MonoBehaviour
             {
                 if (e.Reason == LobbyExceptionReason.Forbidden)
                 {
-                    LoadingScreenUI.instance.ShowLoadingError($"You are kicked by the Host");
+                    //LoadingScreenUI.instance.ShowLoadingError($"You are kicked by the Host");
                 }
                 else if (e.Reason == LobbyExceptionReason.LobbyNotFound && !NetworkManager.Singleton.IsHost)
                 {
@@ -300,7 +297,7 @@ public class LobbyManager : MonoBehaviour
                 StopPolling();
                 _currentLobby = null;
 
-                await Task.Delay(2000);
+                //await Task.Delay(2000);
                 SceneManager.LoadScene("MainMenu");
             }
         }
@@ -352,11 +349,34 @@ public class LobbyManager : MonoBehaviour
             if (player.Data.TryGetValue("PlayerName", out var nameData) && nameData.Value == playerName)
             {
                 LobbyService.Instance.RemovePlayerAsync(_currentLobby.Id, player.Id);
-                OnPlayerKickedFromLobby?.Invoke(playerName);
+                BrodcastPlayerKickedEventClientRpc(player.Id, playerName);
                 OnLobbyUpdated?.Invoke();
                 return;
             }
         }
 
+    }
+
+
+    [ClientRpc]
+    public void BrodcastPlayerKickedEventClientRpc(string playerId,string playerName)
+    {
+        OnPlayerKickedFromLobby?.Invoke(playerId, playerName);
+        if(playerId == AuthenticationService.Instance.PlayerId)
+        {
+            LoadingScreenUI.instance.ShowLoadingError($"You are kicked by the host:{GetNameById(_currentLobby.HostId)}");
+            StopPolling();
+            _currentLobby = null;
+            SceneManager.LoadScene("MainMenu");
+        }
+    }
+
+    public string GetNameById(string id)
+    {
+        foreach (var player in _currentLobby.Players)
+        {
+            if (player.Id == id) return player.Data["PlayerName"].Value;
+        }
+        return null;
     }
 }
