@@ -123,7 +123,7 @@ public class LobbyManager : NetworkBehaviour
             };
 
             _currentLobby = await LobbyService.Instance.CreateLobbyAsync(hostName, GameData.playersCount, lobbyOptions);
-
+            await ChatManager.Instance.JoinChannel(relayJoinCode);
             StartHeartBeat();
             return null;
         }
@@ -194,7 +194,7 @@ public class LobbyManager : NetworkBehaviour
             GameData.votingDuration = float.Parse(_currentLobby.Data["VotingDuration"].Value);
             GameData.canImposterHaveWord = bool.Parse(_currentLobby.Data["CanImposterHaveWord"].Value);
             GameData.playersCount = int.Parse(_currentLobby.Data["PlayersCount"].Value);
-
+            await ChatManager.Instance.JoinChannel(relayJoinCode);
             return true;
         }
         catch (Exception e)
@@ -225,6 +225,7 @@ public class LobbyManager : NetworkBehaviour
             }
             _currentLobby = null;
             StopPolling();
+            await ChatManager.Instance.LeaveChannel();
             NetworkManager.Singleton.Shutdown();
             NetworkManager.Singleton.SceneManager.LoadScene("MainMenu", UnityEngine.SceneManagement.LoadSceneMode.Single);
         }

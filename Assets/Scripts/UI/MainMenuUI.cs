@@ -4,6 +4,7 @@ using TMPro;
 using Unity.Netcode;
 using Unity.Services.Authentication;
 using Unity.Services.Core;
+using Unity.Services.Vivox;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -127,6 +128,8 @@ public class MainMenuUI : MonoBehaviour
             {
                 await AuthenticationService.Instance.SignInAnonymouslyAsync();
             }
+
+            await ChatManager.Instance.InitializeVivox();
             Debug.Log("Signed in as: " + AuthenticationService.Instance.PlayerId);
         }
         catch(Exception e)
