@@ -26,8 +26,14 @@ public class ChatManager : MonoBehaviour
     {
         try
         {
+
             await VivoxService.Instance.InitializeAsync();
             _isInitialized = true;
+            LoginOptions loginOptions = new LoginOptions() 
+            { 
+                DisplayName = GameData.devicePlayerName,
+            };
+            await VivoxService.Instance.LoginAsync(loginOptions);
 
             VivoxService.Instance.ChannelMessageReceived += HandleChannelMsgReceived;
             Debug.Log("Vivox Initialized succesfully");

@@ -12,7 +12,6 @@ using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using static UnityEngine.LowLevelPhysics2D.PhysicsLayers;
 
 public class LobbyManager : NetworkBehaviour
 {
