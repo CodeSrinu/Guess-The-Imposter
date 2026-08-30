@@ -27,6 +27,7 @@ public class ChatPanelUI : MonoBehaviour
     private void SceneManager_sceneLoaded(Scene scene, LoadSceneMode sceneMode)
     {
         if(scene.name == "Lobby") chatButton.gameObject.SetActive(true);
+        else chatButton.gameObject.SetActive(false);
     }
 
     private void HandleMessageReceived(ChatMessage msg)

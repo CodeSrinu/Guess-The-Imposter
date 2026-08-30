@@ -122,6 +122,8 @@ public class LobbyManager : NetworkBehaviour
             };
 
             _currentLobby = await LobbyService.Instance.CreateLobbyAsync(hostName, GameData.playersCount, lobbyOptions);
+            GameData.devicePlayerName = hostName;
+            await ChatManager.Instance.VivoxPlayerLoginAsync();
             await ChatManager.Instance.JoinChannel(relayJoinCode);
             StartHeartBeat();
             return null;
@@ -193,6 +195,8 @@ public class LobbyManager : NetworkBehaviour
             GameData.votingDuration = float.Parse(_currentLobby.Data["VotingDuration"].Value);
             GameData.canImposterHaveWord = bool.Parse(_currentLobby.Data["CanImposterHaveWord"].Value);
             GameData.playersCount = int.Parse(_currentLobby.Data["PlayersCount"].Value);
+            GameData.devicePlayerName = playerName;
+            await ChatManager.Instance.VivoxPlayerLoginAsync();
             await ChatManager.Instance.JoinChannel(relayJoinCode);
             return true;
         }
