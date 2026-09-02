@@ -54,7 +54,8 @@ public class LobbyManager : NetworkBehaviour
             string joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
 
             UnityTransport unityTransport = NetworkManager.Singleton.gameObject.GetComponent<UnityTransport>();
-            RelayServerData relayServerData = new RelayServerData(allocation, "dtls");
+            string connectionType = Application.platform == RuntimePlatform.WebGLPlayer ? "wss" : "dtls";
+            RelayServerData relayServerData = new RelayServerData(allocation, connectionType);
             unityTransport.SetRelayServerData(relayServerData);
 
             errorMsg = "";
@@ -180,7 +181,8 @@ public class LobbyManager : NetworkBehaviour
 
             UnityTransport unityTransport = NetworkManager.Singleton.gameObject.GetComponent<UnityTransport>();
 
-            RelayServerData relayServerData = new RelayServerData(joinAllocation, "dtls");
+            string connectionType = Application.platform == RuntimePlatform.WebGLPlayer ? "wss" : "dtls";
+            RelayServerData relayServerData = new RelayServerData(joinAllocation, connectionType);
 
             unityTransport.SetRelayServerData(relayServerData);
             NetworkManager.Singleton.OnClientConnectedCallback += (id) => {

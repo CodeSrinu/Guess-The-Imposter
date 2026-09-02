@@ -8,24 +8,28 @@ public class AIPlayerBrain
     public bool isImposter = false;
 
     //personality
-    [Range(0f, 1f)] public float talktivness = 0;
+    [Range(0f, 1f)] public float talkativeness = 0;
     [Range(0f, 1f)] public float aggression = 0;
-    [Range(0f, 1f)] public float suspicion_bias = 0;
-    [Range(0f, 1f)] public float trust_bias = 0;
-    [Range(0f, 1f)] public float bluff_tendency = 0;
+    [Range(0f, 1f)] public float suspicionBias = 0;
+    [Range(0f, 1f)] public float trustBias = 0;
+    [Range(0f, 1f)] public float bluffTendency = 0;
     [Range(0f, 1f)] public float defensiveness = 0;
 
     //belief-state
     public Dictionary<string, float> suspicionMap = new Dictionary<string, float>();
     public Dictionary<string, float> trustMap = new Dictionary<string, float>();
-    public string infferedCivilianWord;
-    [Range(0f,1f)] public float infferedWordConfidence;
+    public string inferredCivilianWord;
+    [Range(0f,1f)] public float inferredWordConfidence;
+    private List<MemoryEntry> _memoryLog = new List<MemoryEntry>();
+    public List<MemoryEntry> MemoryLog => _memoryLog;
 
     public AIPlayerBrain(string aiName, string id)
     {
         this.aiName = aiName;
         this.id = id;
+        ClearMemory();
     }
+
 
     public AIPlayerBrain Initialize(List<string> allPlayerIds)
     {
@@ -83,7 +87,6 @@ public class AIPlayerBrain
         defensiveness = 0.6f,
         description = "You are quiet and analytical. You observe carefully before speaking. When you do talk, you reference specific clues. You speak in short, measured sentences."
     };
-
     public static CharacterProfile Manipulative => new CharacterProfile
     {
         archetype = CharacterArchetype.Manipulative,
@@ -95,7 +98,6 @@ public class AIPlayerBrain
         defensiveness = 0.4f,
         description = "You are confident and strategic. You steer conversations toward others before they point at you. You use flattery and deflection. You never seem nervous."
     };
-
     public static CharacterProfile Chaotic => new CharacterProfile
     {
         archetype = CharacterArchetype.Chaotic,
@@ -107,7 +109,6 @@ public class AIPlayerBrain
         defensiveness = 0.2f,
         description = "You are unpredictable and impulsive. You speak before thinking. You change topics suddenly. You accuse people for no clear reason sometimes."
     };
-
     public static CharacterProfile Aggressive => new CharacterProfile
     {
         archetype = CharacterArchetype.Aggressive,
@@ -119,6 +120,32 @@ public class AIPlayerBrain
         defensiveness = 0.5f,
         description = "You are direct and confrontational. You say exactly what you think. You don't apologize or soften your accusations. You push back hard when challenged."
     };
+
+    public void AddMemory(int round, string player, string eventType, string details)
+    {
+        MemoryEntry entry = new MemoryEntry();
+        entry.round = round;
+        entry.player = player;
+        entry.eventType = eventType;
+        entry.details = details;
+
+        _memoryLog.Add(entry);
+        if(_memoryLog.Count > 10)
+        {
+            _memoryLog.RemoveAt(0);
+        }
+    }
+
+    public List<MemoryEntry> GetRecentMemories(int count = 10)
+    {
+        int startIndex = Mathf.Max(0, _memoryLog.Count - count);
+        return _memoryLog.GetRange(startIndex, Mathf.Min(count, _memoryLog.Count));
+    }
+
+    public void ClearMemory()
+    {
+        _memoryLog.Clear();
+    }
 
     public bool ShouldSpeakThisRound(int round, bool wasAccusedLastRound, CharacterProfile profile)
     {
@@ -140,8 +167,6 @@ public class AIPlayerBrain
 
         speakProbability = Mathf.Clamp01(speakProbability);
 
-        return speakProbability > Random.Range(0, 1);
+        return speakProbability > Random.value;
     }
-
-    public Player
 }

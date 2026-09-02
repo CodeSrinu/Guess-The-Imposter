@@ -54,14 +54,16 @@ public class ChatManager : MonoBehaviour
         OnMessageReceived?.Invoke(msg);
     }
 
-    public async Task JoinChannel(string chanelName)
+    public async Task JoinChannel(string channelName)
     {
         if (!_isInitialized) return;
 
         try
         {
-            _currentChannelName = chanelName;
-            await VivoxService.Instance.JoinGroupChannelAsync(chanelName, ChatCapability.TextAndAudio);      
+            _currentChannelName = "TestingChannel";
+            //_currentChannelName = channelName;
+            //await VivoxService.Instance.JoinGroupChannelAsync(channelName, ChatCapability.TextAndAudio);      
+            await VivoxService.Instance.JoinGroupChannelAsync("TestingChannel", ChatCapability.TextOnly);      
         }
         catch(Exception e)
         {
