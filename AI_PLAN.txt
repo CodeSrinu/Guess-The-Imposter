@@ -1,0 +1,54 @@
+# AI Player Architecture - Implementation Phase 1
+
+## What You Have
+- `AIPlayerBrain.cs` - Contains AI player data (personality, suspicion map, memory, role, word)
+
+## What You Need to Build Next
+
+### 1. Create `AIIntent.cs`
+A plain data class that represents what the AI has decided to do.
+
+**Fields needed:**
+- `ActionType` - enum: StaySilent, GiveClue, Accuse, Vote, Defend
+- `TargetPlayerId` - the player being accused or voted for (empty for clue or silent)
+- `Clue` - the clue text itself (empty for other actions)
+- `Reasoning` - short plain-text explanation of why this action was chosen
+- `PersonalityLabel` - the archetype name (e.g., "AnalyticalQuiet", "Aggressive")
+
+**Purpose:** This is the "intent packet" that decouples decision-making from language generation. The AI decides WHAT to do, then passes it to the LLM to generate natural text.
+
+### 2. Modify `AIPlayerSystem.cs`
+- Keep the `Actions` enum
+- Remove the data fields you added (`targetPlayerId`, `clue`, etc.)
+- Add methods:
+  - `DecideAction(AIPlayerBrain brain, GameState state)` - returns `AIIntent`
+  - `GenerateSpeech(AIIntent intent)` - calls the LLM service
+
+### 3. Create `LLMService.cs`
+A service class that handles LLM API communication.
+
+**Fields needed:**
+- `apiKey` - your Gemini or OpenRouter API key
+- `endpointUrl` - the API endpoint
+
+**Methods needed:**
+- `GetResponse(AIIntent intent)` - builds prompt from intent, calls LLM, returns text
+
+**HTTP Architecture:**
+```
+Unity → LLMService → [POST /v1/chat/completions] → Gemini/OpenRouter → response text
+```
+
+### 4. Integration Flow
+1. Game manager triggers AI turn
+2. `AIPlayerSystem.DecideAction()` reads brain's suspicion map and decides action
+3. Creates `AIIntent` with reasoning and personality
+4. `LLMService.GetResponse(intent)` builds prompt and calls LLM
+5. LLM returns natural language text
+6. Game displays the text to players
+
+## Key Principle
+DECISION = Your code (using brain's data)
+LANGUAGE = LLM (just generates text from decision)
+
+Never let the LLM decide what to do. Always decide first, then ask it to say it.
